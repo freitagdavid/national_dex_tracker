@@ -1,5 +1,7 @@
 import { combineReducers } from "redux";
 import { Pokedex } from "pokeapi-js-wrapper";
+import { nationalDex } from "../data/nationalDex";
+import { useStore } from "react-redux";
 export const FETCH_POKEMON_START = "FETCH_POKEMON_START";
 export const FETCH_POKEMON_SUCCESS = "FETCH_POKEMON_FAILURE";
 export const FETCH_POKEMON_FAILURE = "FETCH_POKEMON_FAILURE";
@@ -61,6 +63,7 @@ export const fetchPokemon = () => dispatch => {
             return P.resource(res.results.map(item => item.url));
         })
         .then(res => {
+            // console.log(JSON.stringify(res));
             return res.filter(item => item.is_default);
         })
         .then(res => {
@@ -76,6 +79,21 @@ export const fetchPokemon = () => dispatch => {
             }
             dispatch({ type: SET_POKEMONS, payload: pokeObj });
         });
+};
+
+export const loadLocalPokemon = () => dispatch => {
+    const store = useStore();
+    const currentState = store.getState();
+    if (currentState.reducer.isLoading === true) {
+        dispatch({ type: SET_NUM_POKEMON, payload: nationalDex.length });
+        const toAdd = nationalDex.map(item => {
+            return {
+                ...item,
+                caught: false
+            };
+        });
+        dispatch({ type: SET_POKEMONS, payload: toAdd });
+    }
 };
 
 export default combineReducers({

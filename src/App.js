@@ -2,12 +2,12 @@ import React from "react";
 import styled from "styled-components";
 import Header from "./components/Header";
 import BoxList from "./components/BoxList";
-import { fetchPokemon } from "./reducers";
+import { loadLocalPokemon } from "./reducers";
 import { useDispatch } from "react-redux";
 
 function App() {
     const dispatch = useDispatch();
-    dispatch(fetchPokemon());
+    dispatch(loadLocalPokemon());
     return (
         <div className="App">
             <Header />
