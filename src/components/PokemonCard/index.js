@@ -8,7 +8,6 @@ function PokemonCard(props) {
     const dispatch = useDispatch();
 
     const toggle = () => {
-        console.log(pokeNum);
         dispatch({ type: "TOGGLE_POKEMON", payload: pokeNum });
     };
 

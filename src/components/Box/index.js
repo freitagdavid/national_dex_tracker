@@ -6,23 +6,24 @@ import { useSelector } from "react-redux";
 function Box(props) {
     const boxSize = 30;
     const { className, boxNum } = props;
-    const pokemon = useSelector(state => state.reducer.pokemon);
+    const numPokemon = useSelector(state => state.reducer.numPokemon);
+    let boxPoke = new Array(30);
+    for (let i = 0; i < boxPoke.length; i++) {
+        let pokeNum = boxNum * boxSize + i;
+        if (pokeNum < numPokemon) {
+            boxPoke[i] = (
+                <PokemonCard
+                    key={i}
+                    boxNum={boxNum}
+                    pokeNum={boxNum * boxSize + i}
+                />
+            );
+        }
+    }
     return (
         <div className={className}>
             <h2>{`Box ${boxNum + 1}`}</h2>
-            <div>
-                {pokemon
-                    .slice(boxNum * boxSize, boxNum * boxSize + boxSize)
-                    .map((item, i) => {
-                        return (
-                            <PokemonCard
-                                key={i}
-                                boxNum={boxNum}
-                                pokeNum={boxNum * boxSize + i}
-                            />
-                        );
-                    })}
-            </div>
+            <div>{boxPoke}</div>
         </div>
     );
 }

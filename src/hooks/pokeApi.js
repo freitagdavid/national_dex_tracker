@@ -19,36 +19,3 @@ export const useToggleCaught = id => {
 
     return toggle;
 };
-
-// export const usePokemonList = () => {
-//     const [numPokemon, setNumPokemon] = useGlobal("numPokemon");
-//     const [pokemon, setPokemon] = useGlobal("pokemon");
-//     const [isLoading, setIsloading] = useGlobal("isLoading");
-
-//     useEffect(() => {
-//         if (isLoading) {
-//             P.getPokemonsList()
-//                 .then(res => {
-//                     return Promise.all(
-//                         res.results.map(item => P.resource(item.url))
-//                     );
-//                 })
-//                 .then(res => {
-//                     return res.filter(item => item.is_default);
-//                 })
-//                 .then(res => {
-//                     console.log(res.length);
-//                     setNumPokemon(res.length);
-//                     return (res = res.map(item => {
-//                         return { ...item, caught: false };
-//                     }));
-//                 })
-//                 .then(res => {
-//                     setPokemon(res);
-//                     setIsloading(false);
-//                 });
-//         }
-//     }, []);
-
-//     return [{ numPokemon, pokemon }, isLoading];
-// };

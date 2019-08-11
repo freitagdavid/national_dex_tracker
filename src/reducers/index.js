@@ -35,18 +35,16 @@ const reducer = (state = initialState, action) => {
                 pokemon: action.payload
             };
         case TOGGLE_POKEMON:
+            console.log(state.pokemon[action.payload]);
             return {
                 ...state,
-                pokemon: state.pokemon.map((item, i) => {
-                    if (i === action.payload) {
-                        return {
-                            ...item,
-                            caught: !item.caught
-                        };
-                    } else {
-                        return item;
+                pokemon: {
+                    ...state.pokemon,
+                    [action.payload]: {
+                        ...state.pokemon[action.payload],
+                        caught: !state.pokemon[action.payload].caught
                     }
-                }),
+                },
                 numCaught: state.pokemon[action.payload].caught
                     ? state.numCaught - 1
                     : state.numCaught + 1
@@ -72,7 +70,11 @@ export const fetchPokemon = () => dispatch => {
             }));
         })
         .then(res => {
-            dispatch({ type: SET_POKEMONS, payload: res });
+            let pokeObj = {};
+            for (let i = 0; i < res.length; i++) {
+                pokeObj[i] = res[i];
+            }
+            dispatch({ type: SET_POKEMONS, payload: pokeObj });
         });
 };
 

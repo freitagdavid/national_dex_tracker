@@ -1,7 +1,9 @@
 import React, { Suspense } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import Box from "../Box";
+// import Box from "../Box";
+
+const Box = React.lazy(() => import("../Box"));
 
 const BoxList = props => {
     const { className } = props;
