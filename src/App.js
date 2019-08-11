@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import styled from "styled-components";
+import Header from "./components/Header";
+import BoxList from "./components/BoxList";
+import { fetchPokemon } from "./reducers";
+import { useDispatch } from "react-redux";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const dispatch = useDispatch();
+    dispatch(fetchPokemon());
+    return (
+        <div className="App">
+            <Header />
+            <BoxList />
+        </div>
+    );
 }
 
-export default App;
+const StyledApp = styled(App)`
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+`;
+
+export default StyledApp;
