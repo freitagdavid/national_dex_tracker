@@ -6,6 +6,12 @@ function PokemonCard(props) {
     const { className, pokeNum } = props;
     const pokemon = useSelector(state => state.reducer.pokemon[pokeNum]);
     const dispatch = useDispatch();
+    let image;
+    try {
+        image = require(`../../img/pokedex/${props.pokeNum}.png`);
+    } catch (e) {
+        image = pokemon.sprites.front_default;
+    }
 
     const toggle = () => {
         dispatch({ type: "TOGGLE_POKEMON", payload: pokeNum });
@@ -17,12 +23,7 @@ function PokemonCard(props) {
             onClick={() => toggle()}
         >
             <h3>{pokemon.name}</h3>
-            <img
-                src={pokemon.sprites.front_default}
-                width="96"
-                height="96"
-                alt={pokemon.name}
-            />
+            <img src={image} width="96" height="96" alt={pokemon.name} />
         </div>
     );
 }
