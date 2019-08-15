@@ -11,7 +11,12 @@ const Header = props => {
     return (
         <header className={className}>
             <h1>National Dex Tracker</h1>
-            <ProgressBar total={numPokemon} complete={numCaught} />
+            <ProgressBar
+                total={numPokemon}
+                complete={numCaught}
+                width="90vw"
+                height="40px"
+            />
         </header>
     );
 };

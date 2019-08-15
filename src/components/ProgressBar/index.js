@@ -13,27 +13,32 @@ function ProgressBar(props) {
 const StyledProgressBar = styled(ProgressBar)`
     position: relative;
     display: flex;
-    width: 90vw;
-    height: 40px;
+    width: ${props => `${props.width}`};
+    height: ${props => `${props.height}`};
+    /* width: 100%; */
+    /* height: 40px; */
     justify-content: center;
     align-items: center;
     outline: solid black 1px;
     margin: 0 auto;
     span {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: black;
+        z-index: 1;
         &:after {
-        content:'\\A';
-        position: absolute;
-        background: red;
-        top:0;
-        bottom:0;
-        left:0;
-        width: ${props => `${(props.complete / props.total) * 100}%`};
+            z-index: -1;
+            content: "\\A";
+            position: absolute;
+            background-color: red;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: ${props => `${(props.complete / props.total) * 100}%`};
         }
     }
     span {
-        /* width: ${props => `${(props.complete / props.total) * 100}%`}; */
         /* background-color: red; */
-
     }
 `;
 

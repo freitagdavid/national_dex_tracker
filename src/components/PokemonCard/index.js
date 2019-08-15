@@ -3,8 +3,14 @@ import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 
 function PokemonCard(props) {
-    const { className, pokeNum } = props;
-    const pokemon = useSelector(state => state.reducer.pokemon[pokeNum]);
+    const {
+        className,
+        pokeNum,
+        toggleComplete,
+        pokemonBoxNum,
+        pokemon
+    } = props;
+    // const pokemon = useSelector(state => state.reducer.pokemon[pokeNum]);
     const dispatch = useDispatch();
     let image;
     try {
@@ -23,7 +29,7 @@ function PokemonCard(props) {
             onClick={() => toggle()}
         >
             <h3>{pokemon.name}</h3>
-            <img src={image} width="96" height="96" alt={pokemon.name} />
+            <img src={image} alt={pokemon.name} />
         </div>
     );
 }
@@ -44,6 +50,8 @@ const StyledPokemonCard = styled(PokemonCard)`
     }
     img {
         align-self: center;
+        width: 96px;
+        height: 96px;
     }
     &.selected h3 {
         background-color: green;

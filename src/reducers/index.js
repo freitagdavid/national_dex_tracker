@@ -99,3 +99,13 @@ export const loadLocalPokemon = () => dispatch => {
 export default combineReducers({
     reducer
 });
+
+export const getRangePokemon = state => {
+    return range => {
+        let outList = [];
+        for (let i = range[0]; i < range[1]; i++) {
+            outList.push(state.reducer.pokemon[i]);
+        }
+        return outList;
+    };
+};
