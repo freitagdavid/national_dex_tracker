@@ -1,11 +1,11 @@
-import React from "reactn";
+import React from "react"
 import styled from "styled-components";
 
 function ProgressBar(props) {
-    let { total, complete, className } = props;
+    let { percentComplete, className } = props;
     return (
-        <span className={className}>
-            <span>{(complete / total) * 100}%</span>
+        <span className={ className }>
+            <span>{ percentComplete }%</span>
         </span>
     );
 }
@@ -15,8 +15,6 @@ const StyledProgressBar = styled(ProgressBar)`
     display: flex;
     width: ${props => `${props.width}`};
     height: ${props => `${props.height}`};
-    /* width: 100%; */
-    /* height: 40px; */
     justify-content: center;
     align-items: center;
     outline: solid black 1px;
@@ -34,7 +32,7 @@ const StyledProgressBar = styled(ProgressBar)`
             top: 0;
             bottom: 0;
             left: 0;
-            width: ${props => `${(props.complete / props.total) * 100}%`};
+            width: ${props => `${props.percentComplete}%`};
         }
     }
     span {
