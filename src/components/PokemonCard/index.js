@@ -1,17 +1,15 @@
 import React from "react";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
+import { useApp } from "../../app/"
 
 function PokemonCard(props) {
+    const { actions } = useApp();
     const {
         className,
         pokeNum,
-        toggleComplete,
-        pokemonBoxNum,
-        pokemon
+        pokemon,
+        updateProgress
     } = props;
-    // const pokemon = useSelector(state => state.reducer.pokemon[pokeNum]);
-    const dispatch = useDispatch();
     let image;
     try {
         image = require(`../../img/pokedex/${props.pokeNum}.png`);
@@ -19,17 +17,18 @@ function PokemonCard(props) {
         image = pokemon.sprites.front_default;
     }
 
-    const toggle = () => {
-        dispatch({ type: "TOGGLE_POKEMON", payload: pokeNum });
-    };
+    const onClick = () => {
+        actions.togglePokemon(pokeNum);
+        updateProgress();
+    }
 
     return (
         <div
-            className={`${className} ${pokemon.caught ? "selected" : ""}`}
-            onClick={() => toggle()}
+            className={ `${className} ${pokemon.caught ? "selected" : ""}` }
+            onClick={ () => onClick() }
         >
-            <h3>{pokemon.name}</h3>
-            <img src={image} alt={pokemon.name} />
+            <h3>{ pokemon.name }</h3>
+            <img src={ image } alt={ pokemon.name } />
         </div>
     );
 }
@@ -58,9 +57,5 @@ const StyledPokemonCard = styled(PokemonCard)`
         color: white;
     }
 `;
-
-// export default withGlobal(function(global) {
-//     console.log(global);
-// })(StyledPokemonCard);
 
 export default StyledPokemonCard;
