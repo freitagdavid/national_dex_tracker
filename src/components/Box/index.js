@@ -1,81 +1,57 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import PokemonCard from "../PokemonCard";
-import { useSelector } from "react-redux";
-import upChevron from "../../img/upChevron.svg";
 import downChevron from "../../img/downChevron.svg";
 import ProgressBar from "../ProgressBar";
-import { getRangePokemon } from "../../reducers";
+import { useApp } from "../../app/"
+import { useEffect } from "react";
 
 function Box(props) {
+    const { state } = useApp();
     const boxSize = 30;
     const { className, boxNum } = props;
-    const numPokemon = useSelector(state => state.reducer.numPokemon);
     const [collapsed, setCollapsed] = useState(false);
-    const boxPokemon = useSelector(state =>
-        getRangePokemon(state)([boxNum * boxSize, boxNum * boxSize + boxSize])
-    );
-    let boxCaught = 0;
-    let total = 0;
-    let boxPoke = new Array(30);
+    const [boxCaughtPercent, setBoxCaughtPercent] = useState("0");
+
+    useEffect(() => {
+        updateProgress()
+    }, [])
 
     const toggleCollapse = () => {
         setCollapsed(state => !state);
     };
 
-    boxPoke = boxPokemon.map((pokemon, index) => {
-        let pokeNum = boxNum * boxSize + index;
-        if (pokeNum < numPokemon) {
-            total++;
-            if (pokemon.caught) {
-                boxCaught++;
-            }
-            return (
-                <PokemonCard
-                    pokemon={pokemon}
-                    key={index}
-                    boxNum={boxNum}
-                    pokeNum={boxNum * boxSize + index}
-                />
-            );
-        }
-    });
+    let boxPoke = state.boxes[boxNum].map((pokemon, index) => {
+        return <PokemonCard pokemon={ pokemon } boxNum={ boxNum } pokeNum={ boxNum * boxSize + index } updateProgress={ () => updateProgress() } />
+    })
 
-    // for (let i = 0; i < boxPoke.length; i++) {
-    //     let pokeNum = boxNum * boxSize + i;
-    //     if (pokeNum < numPokemon) {
-    //         boxPoke[i] = (
-    //             <PokemonCard
-    //                 key={i}
-    //                 boxNum={boxNum}
-    //                 pokeNum={boxNum * boxSize + i}
-    //             />
-    //         );
-    //     }
-    // }
+    const updateProgress = () => setBoxCaughtPercent(() => {
+        return (state.boxes[boxNum].filter((item, index) => state.pokemon[boxNum * boxSize + index].caught).length / state.boxes[boxNum].length * 100).toFixed(2)
+    }
+    )
+
     return (
-        <div className={className}>
-            <div className="boxHeader" onClick={() => toggleCollapse()}>
+        <div className={ className }>
+            <div className="boxHeader" onClick={ () => toggleCollapse() }>
                 <div className="imgWrapper">
                     <img
-                        src={downChevron}
-                        className={collapsed ? "closed" : "open"}
+                        src={ downChevron }
+                        className={ collapsed ? "closed" : "open" }
                     />
                 </div>
-                <h2>{`Box ${boxNum + 1}`}</h2>
+                <h2>{ `Box ${boxNum + 1}` }</h2>
                 <div className="progressWrapper">
                     <ProgressBar
-                        total={total}
-                        complete={boxCaught}
+                        percentComplete={ boxCaughtPercent }
                         height="100%"
                         width="100%"
                     ></ProgressBar>
                 </div>
             </div>
-            <div className={`${collapsed ? "closed" : "open"} boxContent`}>
-                {boxPoke}
+            <div className={ `${collapsed ? "closed" : "open"} boxContent` }>
+                { boxPoke }
             </div>
-        </div>
+        </div >
     );
 }
 
@@ -93,14 +69,6 @@ const StyledBox = styled(Box)`
         .open {
             transition: all 0.15s linear;
         }
-        /* > img {
-            position: relative;
-            top: -6px;
-            left: -3px;
-            width: 64px;
-            height: auto;
-            filter: invert(100%);
-        } */
     }
     h2 {
         color: white;
@@ -144,12 +112,6 @@ const StyledBox = styled(Box)`
             justify-content: center;
         }
     }
-    /* & > .boxHeader > img {
-        position: relative;
-        top: 1px;
-        width: 32px;
-        height: 32px;
-    } */
     & > .boxContent {
         transition: max-height 0.2s linear;
         display: grid;
