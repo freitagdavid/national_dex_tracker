@@ -1,21 +1,19 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
 import ProgressBar from "../ProgressBar";
+import { useApp } from "../../overmind";
 
 const Header = props => {
+    const { state } = useApp();
     const { className } = props;
-    const numCaught = useSelector(state => state.reducer.numCaught);
-    const numPokemon = useSelector(state => state.reducer.numPokemon);
 
     return (
-        <header className={className}>
+        <header className={ className }>
             <h1>National Dex Tracker</h1>
             <ProgressBar
-                total={numPokemon}
-                complete={numCaught}
                 width="90vw"
                 height="40px"
+                percentComplete={ state.percentComplete }
             />
         </header>
     );
