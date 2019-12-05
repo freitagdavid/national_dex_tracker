@@ -1,11 +1,5 @@
 import React from "react";
 import { useApp } from "../../app/"
-import { Card, CardPrimaryAction, CardMedia, CardActions, CardActionButtons, CardActionButton } from "@rmwc/card"
-import { Typography } from "@rmwc/typography"
-import '@material/typography/dist/mdc.typography.css'
-import '@material/card/dist/mdc.card.css';
-import '@material/button/dist/mdc.button.css';
-import '@material/icon-button/dist/mdc.icon-button.css';
 
 function PokemonCard(props) {
     const { actions } = useApp();

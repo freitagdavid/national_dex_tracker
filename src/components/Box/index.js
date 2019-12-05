@@ -4,10 +4,6 @@ import PokemonCard from "../PokemonCard";
 import ProgressBar from "../ProgressBar";
 import { useApp } from "../../app/"
 import { useEffect } from "react";
-import '@material/list/dist/mdc.list.css';
-import '@rmwc/list/collapsible-list.css';
-import '@material/grid-list/dist/mdc.grid-list.css';
-import '@material/typography/dist/mdc.typography.min.css'
 
 function Box(props) {
     const { state } = useApp();
