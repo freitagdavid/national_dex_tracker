@@ -1,13 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import PokemonCard from "../PokemonCard";
-import downChevron from "../../img/downChevron.svg";
 import ProgressBar from "../ProgressBar";
 import { useApp } from "../../app/"
 import { useEffect } from "react";
-import { CollapsibleList, SimpleListItem } from "@rmwc/list"
-import { GridList } from "@rmwc/grid-list"
-import { Typography } from "@rmwc/typography"
 import '@material/list/dist/mdc.list.css';
 import '@rmwc/list/collapsible-list.css';
 import '@material/grid-list/dist/mdc.grid-list.css';
@@ -17,7 +13,6 @@ function Box(props) {
     const { state } = useApp();
     const boxSize = 30;
     const { className, boxNum } = props;
-    const [collapsed, setCollapsed] = useState(false);
     const [boxCaughtPercent, setBoxCaughtPercent] = useState("0");
 
     useEffect(() => {
@@ -46,12 +41,15 @@ function Box(props) {
 const StyledBox = styled(Box)`
     width: 1048px;
     margin-top: 25px;
+    height: fit-content;
     .display-data {
+        margin-top: 10px;
         width: 100%;
         height: 100%;
         display: grid;
         grid-gap: 10px;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
     }
 `
 
