@@ -5,6 +5,13 @@ import downChevron from "../../img/downChevron.svg";
 import ProgressBar from "../ProgressBar";
 import { useApp } from "../../app/"
 import { useEffect } from "react";
+import { CollapsibleList, SimpleListItem } from "@rmwc/list"
+import { GridList } from "@rmwc/grid-list"
+import { Typography } from "@rmwc/typography"
+import '@material/list/dist/mdc.list.css';
+import '@rmwc/list/collapsible-list.css';
+import '@material/grid-list/dist/mdc.grid-list.css';
+import '@material/typography/dist/mdc.typography.min.css'
 
 function Box(props) {
     const { state } = useApp();
@@ -17,10 +24,6 @@ function Box(props) {
         updateProgress()
     }, [])
 
-    const toggleCollapse = () => {
-        setCollapsed(state => !state);
-    };
-
     let boxPoke = state.boxes[boxNum].map((pokemon, index) => {
         return <PokemonCard pokemon={ pokemon } boxNum={ boxNum } pokeNum={ boxNum * boxSize + index } updateProgress={ () => updateProgress() } />
     })
@@ -31,99 +34,25 @@ function Box(props) {
     )
 
     return (
-        <div className={ className }>
-            <div className="boxHeader" onClick={ () => toggleCollapse() }>
-                <div className="imgWrapper">
-                    <img
-                        src={ downChevron }
-                        className={ collapsed ? "closed" : "open" }
-                    />
-                </div>
-                <h2>{ `Box ${boxNum + 1}` }</h2>
-                <div className="progressWrapper">
-                    <ProgressBar
-                        percentComplete={ boxCaughtPercent }
-                        height="100%"
-                        width="100%"
-                    ></ProgressBar>
-                </div>
-            </div>
-            <div className={ `${collapsed ? "closed" : "open"} boxContent` }>
+        <div className={ className } data-role="panel" data-title-caption={ `Box ${boxNum + 1}` } data-collapsible="true">
+            <ProgressBar percentComplete={ boxCaughtPercent } />
+            <div className="display-data">
                 { boxPoke }
             </div>
-        </div >
+        </div>
     );
 }
 
 const StyledBox = styled(Box)`
-    width: 90vw;
-    border: solid black 1px;
-    margin: 20px 0;
-    .imgWrapper {
-        height: 0;
-        /* transition: all 0.1s linear; */
-        .closed {
-            transition: all 0.15s linear;
-            transform: rotate(180deg);
-        }
-        .open {
-            transition: all 0.15s linear;
-        }
-    }
-    h2 {
-        color: white;
-        background-color: black;
+    width: 1048px;
+    margin-top: 25px;
+    .display-data {
         width: 100%;
-        text-align: center;
-        padding: 15px 0;
-        img {
-            float: left;
-            height: 32px;
-            width: 32px;
-        }
-    }
-    .boxHeader {
+        height: 100%;
         display: grid;
-        width: 100%;
+        grid-gap: 10px;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-        align-items: center;
-        background-color: black;
-        .imgWrapper {
-            grid-column: 1 / 3;
-            height: 100%;
-            width: 100%;
-            > img {
-                filter: invert(100%);
-                width: 40px;
-                height: 40px;
-            }
-        }
-        h2 {
-            grid-column: 3 / 5;
-        }
-        .progressWrapper {
-            background-color: white;
-            width: 95%;
-            height: 80%;
-            margin: 10px auto;
-            display: flex;
-            grid-column: 5 / 7;
-            align-content: center;
-            justify-content: center;
-        }
     }
-    & > .boxContent {
-        transition: max-height 0.2s linear;
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-        outline: 1px solid black;
-        overflow: hidden;
-        max-height: 635px;
-        &.closed {
-            max-height: 0;
-        }
-    }
-`;
+`
 
 export default StyledBox;

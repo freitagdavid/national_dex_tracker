@@ -3,7 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "antd": "^3.26.0",
+        "@rmwc/top-app-bar": "^5.7.0",
+        "metro4": "^4.3.4",
+        "metro4-react": "^0.1.2",
         "overmind": "^20.0.0",
         "overmind-react": "^21.0.0",
         "page": "^1.11.5",
@@ -11,6 +13,7 @@
         "react": "^16.12.0",
         "react-dom": "^16.12.0",
         "react-scripts": "^3.2.0",
+        "rmwc": "^5.7.1",
         "styled-components": "^4.4.1",
         "typescript": "^3.5.3"
     },

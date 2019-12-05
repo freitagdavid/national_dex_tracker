@@ -6,6 +6,7 @@ import * as serviceWorker from "./serviceWorker";
 import { Provider as OMProvider } from 'overmind-react'
 import { config } from "./app/"
 import { createOvermind } from "overmind";
+import { RMWCProvider } from '@rmwc/provider'
 
 // const store = createStore(rootReducer, applyMiddleware(thunk, logger));
 
@@ -15,7 +16,9 @@ export const overmind = createOvermind(config, {
 
 ReactDOM.render(
     <OMProvider value={ overmind }>
-        <App />
+        <RMWCProvider>
+            <App />
+        </RMWCProvider>
     </OMProvider>,
     document.getElementById("root")
 );

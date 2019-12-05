@@ -21,4 +21,12 @@ const BoxList = props => {
     );
 };
 
-export default BoxList;
+const StyledBoxList = styled(BoxList)`
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 25px;
+`;
+
+export default StyledBoxList;

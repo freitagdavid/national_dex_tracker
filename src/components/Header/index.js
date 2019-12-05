@@ -1,40 +1,19 @@
 import React from "react";
-import styled from "styled-components";
-import ProgressBar from "../ProgressBar";
-import { useApp } from "../../overmind";
+import { TopAppBar, TopAppBarRow, TopAppBarTitle } from "@rmwc/top-app-bar"
+import ProgressBar from "../ProgressBar"
+import '@material/top-app-bar/dist/mdc.top-app-bar.css'
+import { useApp } from "../../app/";
 
 const Header = props => {
+
     const { state } = useApp();
-    const { className } = props;
 
     return (
-        <header className={ className }>
-            <h1>National Dex Tracker</h1>
-            <ProgressBar
-                width="90vw"
-                height="40px"
-                percentComplete={ state.percentComplete }
-            />
-        </header>
+        <div data-role="appbar">
+            <a href="#" className="brand">National Dex Tracker</a>
+            <ProgressBar percentComplete={ state.percentComplete } />
+        </div>
     );
 };
 
-const StyledHeader = styled(Header)`
-    position: absolute;
-    top: 0;
-    z-index: 1;
-    width: 100%;
-    height: 10vh;
-    min-height: 80px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    background-color: white;
-    outline: black 1px solid;
-    h1 {
-        font-size: 1.5rem;
-        text-align: center;
-    }
-`;
-
-export default StyledHeader;
+export default Header;
