@@ -1,34 +1,32 @@
 import React, { Suspense } from "react";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useApp } from "../../app/"
 // import Box from "../Box";
 
 const Box = React.lazy(() => import("../Box"));
 
 const BoxList = props => {
+    const { state } = useApp();
     const { className } = props;
-    const numPokemon = useSelector(state => state.reducer.numPokemon);
     let boxes = [];
-    let numBoxes = Math.ceil(numPokemon / 30);
+    let numBoxes = state.numBoxes
     for (let i = 0; i < numBoxes; i++) {
-        boxes.push(<Box id={`box-${i}`} boxNum={i} key={i} />);
+        boxes.push(<Box id={ `box-${i}` } boxNum={ i } key={ i } />);
     }
 
     return (
-        <Suspense fallback={<p>Loading</p>}>
-            <div className={className}>{boxes}</div>
+        <Suspense fallback={ <p>Loading</p> }>
+            <div className={ className }>{ boxes }</div>
         </Suspense>
     );
 };
 
 const StyledBoxList = styled(BoxList)`
-    overflow-y: scroll;
-    overflow-x: hidden;
-    height: 90vh;
-    margin-top: 10vh;
+    overflow: hidden;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
+    padding: 25px;
 `;
 
 export default StyledBoxList;

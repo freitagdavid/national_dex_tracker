@@ -1,17 +1,13 @@
 import React from "react";
-import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
+import { useApp } from "../../app/"
 
 function PokemonCard(props) {
+    const { actions } = useApp();
     const {
-        className,
         pokeNum,
-        toggleComplete,
-        pokemonBoxNum,
-        pokemon
+        pokemon,
+        updateProgress
     } = props;
-    // const pokemon = useSelector(state => state.reducer.pokemon[pokeNum]);
-    const dispatch = useDispatch();
     let image;
     try {
         image = require(`../../img/pokedex/${props.pokeNum}.png`);
@@ -19,48 +15,22 @@ function PokemonCard(props) {
         image = pokemon.sprites.front_default;
     }
 
-    const toggle = () => {
-        dispatch({ type: "TOGGLE_POKEMON", payload: pokeNum });
-    };
+    const onClick = () => {
+        actions.togglePokemon(pokeNum);
+        updateProgress();
+    }
 
     return (
-        <div
-            className={`${className} ${pokemon.caught ? "selected" : ""}`}
-            onClick={() => toggle()}
-        >
-            <h3>{pokemon.name}</h3>
-            <img src={image} alt={pokemon.name} />
+        <div className="card" onClick={ () => onClick() } style={ { margin: "0", width: "160px", height: "160px" } }>
+            <div className="card-header" style={ { padding: "0" } }>
+                <h4 className="h6 text-center" style={ { margin: "4px" } }>{ pokemon.name }</h4>
+            </div>
+            <div className="card-content" style={ { display: "flex", alignContent: "center", justifyContent: "center" } }>
+                <img src={ image } style={ { width: "96px", margin: "0", height: "auto" } } />
+            </div>
+            <button className={ `button ${pokemon.caught ? "success" : "alert"} ` } style={ { width: "100%", minHeight: "0" } }>{ pokemon.caught ? "Caught" : "Uncaught" }</button>
         </div>
     );
 }
 
-const StyledPokemonCard = styled(PokemonCard)`
-    border: solid black 1px;
-    height: 125px;
-    width: 1fr;
-    display: flex;
-    flex-direction: column;
-    h3 {
-        background-color: red;
-        color: white;
-        border-bottom: solid black 2px;
-        width: 100%;
-        text-align: center;
-        margin-bottom: 10px;
-    }
-    img {
-        align-self: center;
-        width: 96px;
-        height: 96px;
-    }
-    &.selected h3 {
-        background-color: green;
-        color: white;
-    }
-`;
-
-// export default withGlobal(function(global) {
-//     console.log(global);
-// })(StyledPokemonCard);
-
-export default StyledPokemonCard;
+export default PokemonCard;
