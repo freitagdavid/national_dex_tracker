@@ -9,7 +9,6 @@ export const storage = {
         localStorage.setItem('pokemon', JSON.stringify(pokemon));
     },
     loadPokemon() {
-        P.getPokemonsList().then(list => console.log(list))
         const json = localStorage.getItem("pokemon");
         if (json === null) {
             const pokeList = nationalDex.map(item => item = { ...item, caught: false });
@@ -23,5 +22,8 @@ export const storage = {
 export const pokeApi = {
     getList() {
         return P.getPokemonsList()
+    },
+    getNationalDex() {
+        return P.getPokedexByName("national").then(list => list.pokemon_entries.map(item => { return { nationalDexNum: item.entry_number, name: item.pokemon_species.name } }))
     }
 }

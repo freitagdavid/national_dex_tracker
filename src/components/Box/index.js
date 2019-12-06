@@ -11,6 +11,11 @@ function Box(props) {
     const { className, boxNum } = props;
     const [boxCaughtPercent, setBoxCaughtPercent] = useState("0");
 
+    const updateProgress = () => setBoxCaughtPercent(() => {
+        return (state.boxes[boxNum].filter((item, index) => state.pokemon[boxNum * boxSize + index].caught).length / state.boxes[boxNum].length * 100).toFixed(2)
+    }
+    )
+
     useEffect(() => {
         updateProgress()
     }, [])
@@ -19,10 +24,6 @@ function Box(props) {
         return <PokemonCard pokemon={ pokemon } boxNum={ boxNum } pokeNum={ boxNum * boxSize + index } updateProgress={ () => updateProgress() } />
     })
 
-    const updateProgress = () => setBoxCaughtPercent(() => {
-        return (state.boxes[boxNum].filter((item, index) => state.pokemon[boxNum * boxSize + index].caught).length / state.boxes[boxNum].length * 100).toFixed(2)
-    }
-    )
 
     return (
         <div className={ className } data-role="panel" data-title-caption={ `Box ${boxNum + 1}` } data-collapsible="true">
