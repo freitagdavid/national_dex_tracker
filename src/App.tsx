@@ -19,13 +19,13 @@ function App() {
           <div className="bg-accent w-full h-16 flex justify-center items-center shadow-md">
             <p className="text-primary">National Dex Tracker</p>
           </div>
-          <StatefuleProgress numPokemon={pokemon.data?.pokemon_v2_pokemonspecies.length || 0} />
+          <StatefuleProgress numPokemon={pokemon.data?.pokemon_v2_pokemonspecies.length || 0} fillClassName="bg-green-500" className="rounded-none bg-red-500" />
         </div>
 
-        <div className="w-full flex flex-wrap overflow-scroll h-full justify-center mt-8">
+        <div className="w-full flex flex-wrap overflow-scroll h-full justify-around mt-8">
           {boxes.map((box, i) => {
             return (
-              <Collapsible className="w-11/12 shadow-md border-border border-solid border-2 mb-8">
+              <Collapsible className="w-11/12 shadow-md border-border border-solid border-2 mb-8 max-w-304">
                 <CollapsibleTrigger className="w-full bg-accent text-primary text-center h-14 pb-0">
                   <div className="h-10 flex w-full justify-center flex-col">Box {i + 1}</div>
                   <div className="h-4 w-full m-0 p-0">
@@ -43,12 +43,6 @@ function App() {
 
             )
           })}
-          {/* {pokemon.data?.pokemon_v2_pokemonspecies.map((poke) => {
-            return (
-              <PokemonCard poke={poke} key={poke.id} />
-            )
-          })} */}
-
         </div>
       </div>
     </>

@@ -54,3 +54,4 @@ export const pokemonListQuery = atomWithQuery<Pokemon_V2_Pokemonspecies>({
     }
     `
 })
+

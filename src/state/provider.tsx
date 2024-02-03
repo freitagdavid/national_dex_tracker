@@ -3,7 +3,7 @@ import { Provider as UrqlProvider } from 'urql';
 import { urqlClient } from './client';
 import { clientAtom } from 'jotai-urql';
 import { useHydrateAtoms } from 'jotai/utils';
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 
 const HydrateAtoms = ({ children }: { children: ReactNode }) => {
     useHydrateAtoms([[clientAtom, urqlClient]])
@@ -15,7 +15,9 @@ export const Provider = ({ children }: { children: React.ReactNode }): React.Rea
         < UrqlProvider value={urqlClient} >
             <JotaiProvider>
                 <HydrateAtoms>
-                    {children}
+                    <Suspense fallback={<div>Loading...</div>}>
+                        {children}
+                    </Suspense>
                 </HydrateAtoms>
             </JotaiProvider>
         </UrqlProvider >
