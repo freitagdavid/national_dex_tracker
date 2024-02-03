@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "@radix-ui/react-collapsible": "^1.0.3",
+        "@radix-ui/react-progress": "^1.0.3",
         "@radix-ui/react-scroll-area": "^1.0.5",
         "@radix-ui/react-slot": "^1.0.2",
         "@urql/core": "^4.2.3",

@@ -6,6 +6,26 @@ import { atom } from 'jotai';
 export const caughtStatusFamily = atomFamily((id: number) => atomWithStorage<boolean>(`caught-${id}`, false));
 export const caughtNumber = atomWithStorage('caughtNumber', 0)
 
+export const numPokemonAtom = atom(
+  (get) => get(pokemonListQuery).data?.pokemon_v2_pokemonspecies.length || 0
+)
+
+export const numBoxesAtom = atom(
+  (get) => Math.ceil(get(numPokemonAtom) / 30)
+)
+
+export const boxesAtom = atom(
+  (get): [Pokemon_V2_Pokemonspecies[]] => {
+    const boxes: [Pokemon_V2_Pokemonspecies[]] = [] as unknown as [Pokemon_V2_Pokemonspecies[]];
+    const pokemonList = get(pokemonListQuery).data?.pokemon_v2_pokemonspecies || [];
+    for (let i = 0; i < get(numBoxesAtom); i++) {
+      boxes.push(pokemonList.slice(i * 30, i * 30 + 30))
+    }
+    return boxes;
+  }
+)
+
+
 export const caughtStatus = atomFamily((id: number) => atom(
   (get): boolean => get(caughtStatusFamily(id)),
   (get, set, caught: boolean) => {
@@ -32,6 +52,5 @@ export const pokemonListQuery = atomWithQuery<Pokemon_V2_Pokemonspecies>({
         }
       }
     }
-      
     `
 })
