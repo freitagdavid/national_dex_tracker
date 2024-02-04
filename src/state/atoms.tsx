@@ -14,6 +14,8 @@ export const numBoxesAtom = atom(
   (get) => Math.ceil(get(numPokemonAtom) / 30)
 )
 
+export const boxCaughtAtom = atomFamily((box: number) => atomWithStorage(`box-${box}-caught`, 0))
+
 export const boxesAtom = atom(
   (get): [Pokemon_V2_Pokemonspecies[]] => {
     const boxes: [Pokemon_V2_Pokemonspecies[]] = [] as unknown as [Pokemon_V2_Pokemonspecies[]];
@@ -28,13 +30,15 @@ export const boxesAtom = atom(
 
 export const caughtStatus = atomFamily((id: number) => atom(
   (get): boolean => get(caughtStatusFamily(id)),
-  (get, set, caught: boolean) => {
+  (get, set, {caught, boxNum}: {caught: boolean; boxNum: number;}) => {
     set(caughtStatusFamily(id), caught);
 
     if (caught) {
       set(caughtNumber, (n) => n + 1)
+      set(boxCaughtAtom(boxNum), (n) => n + 1)
     } else {
       set(caughtNumber, (n) => n - 1)
+      set(boxCaughtAtom(boxNum), (n) => n - 1)
     }
   }
 ))
