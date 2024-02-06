@@ -10,6 +10,7 @@ export default defineConfig({
         react({
             babel: {
                 plugins: [jotaiDebugLabel, jotaiReactRefresh],
+                presets: ["jotai/babel/preset"],
             },
         }),
     ],

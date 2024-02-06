@@ -10,7 +10,5 @@ export const StatefuleProgress = ({ numPokemon, className, fillClassName }: { nu
 
     const percentCaught = (caught / numPokemon) * 100;
 
-    console.log(percentCaught)
-
     return (<Progress className={cn("w-full h-8", className)} value={percentCaught} fillClassName={fillClassName} />)
 }
