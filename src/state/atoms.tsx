@@ -18,13 +18,13 @@ export const numBoxesAtom = atom(
 
 export const selectedRegionAtom = atomWithStorage('selectedRegion', 'national');
 
-export const selectedGameAtom = atomWithStorage('selectedGame', 'red');
+export const selectedGameAtom = atomWithStorage('selectedGame', 0);
 
 export const boxCaughtAtom = atomFamily((box: number) => atomWithStorage(`box-${box}-caught`, 0))
 
 export const boxesAtom = atom(
-  (get): [Atom<Pokemon_V2_Pokemonspecies>[]] => {
-    const boxes: [Atom<Pokemon_V2_Pokemonspecies>[]] = [] as unknown as [Atom<Pokemon_V2_Pokemonspecies>[]];
+  (get): [Atom<Pokemon>[]] => {
+    const boxes: [Atom<Pokemon>[]] = [] as unknown as [Atom<Pokemon>[]];
     const pokemonList = get(pokemonAtomsAtom) || [];
     for (let i = 0; i < get(numBoxesAtom); i++) {
       boxes.push(pokemonList.slice(i * 30, i * 30 + 30))
@@ -42,7 +42,7 @@ export const processedPokemonList = atom((get) => {
   })
 })
 
-export const pokemonAtomsAtom = splitAtom<Pokemon_V2_Pokemonspecies, Pokemon_V2_Pokemonspecies>(processedPokemonList);
+export const pokemonAtomsAtom = splitAtom<Pokemon, Pokemon>(processedPokemonList);
 
 export const caughtStatus = atomFamily((id: number) => atom(
   (get): boolean => get(caughtStatusFamily(id)),
