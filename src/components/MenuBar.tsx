@@ -46,12 +46,12 @@ export const AppBar = () => {
             <MenubarMenu>
                 <MenubarTrigger>Game Version</MenubarTrigger>
                 <MenubarContent>
-                    <MenubarRadioGroup value={selectedGame}>
+                    <MenubarRadioGroup value={selectedGame.toString()}>
                         {
                             versions[0].map((version: Pokemon_V2_Versionname) => {
                                 return (
                                     // <div>{JSON.stringify(version.name)}</div>
-                                    <MenubarRadioItem onClick={() => setSelectedGame(version.version_id || 0)} value={version.version_id}>
+                                    <MenubarRadioItem onClick={() => setSelectedGame(version.version_id || 0)} value={version.version_id?.toString() || ""}>
                                         {version.name}
                                     </MenubarRadioItem>
                                 )
