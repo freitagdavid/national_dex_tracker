@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai/react';
 import './App.css'
-import { boxesAtom, listTypeAtom, pokemonAtomsAtom, rawPokemonList, processedPokemonList } from './state';
+import { boxesAtom, listTypeAtom, pokemonAtomsAtom } from './state';
 import { StatefuleProgress } from './components/StatefulProgress';
 import { Box } from './components/Box';
 import { AppBar } from './components/MenuBar';
