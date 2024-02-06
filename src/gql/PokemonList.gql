@@ -1,0 +1,8 @@
+query allVersionsEnglishNames {
+    pokemon_v2_versionname(where: { language_id: { _eq: 9 } }) {
+        name
+        id
+        language_id
+        version_id
+    }
+}
