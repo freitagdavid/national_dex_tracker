@@ -1,9 +1,8 @@
 import { atomWithQuery } from 'jotai-urql';
-import type { AllPokemonSpeciesWithSpritesQuery, AllVersionsEnglishNamesQuery, Pokemon_V2_Pokemondexnumber, Pokemon_V2_Pokemonspecies, Pokemon_V2_Pokemontype, Pokemon_V2_Version, Pokemon_V2_Versionname } from '@/gql/graphql';
+import type { AllPokemonSpeciesWithSpritesQuery, AllVersionsEnglishNamesQuery, Pokemon_V2_Pokemondexnumber, Pokemon_V2_Pokemonspecies, Pokemon_V2_Pokemontype } from '@/gql/graphql';
 import { atomFamily, atomWithStorage, splitAtom } from 'jotai/utils';
 import { Atom, atom } from 'jotai';
-import { AnyVariables, OperationResult } from 'urql';
-import { graphql } from '@/gql';
+import { gql } from 'urql';
 
 export const caughtStatusFamily = atomFamily((id: number) => atomWithStorage<boolean>(`caught-${id}`, false));
 export const caughtNumber = atomWithStorage('caughtNumber', 0)
@@ -73,11 +72,11 @@ export interface Pokemon {
   regions: (string | undefined)[];
 }
 
-export const rawToProcessedAtom = atom(async (get) => {
-  const res = await get(rawPokemonList);
+export const rawToProcessedAtom = atom((get) => {
+  const res = get(rawPokemonList);
   if (res.data) {
     const pokemonList = res.data.pokemon_v2_pokemonspecies;
-    return pokemonList.map((poke): Pokemon => {
+    return pokemonList.map((poke: Pokemon_V2_Pokemonspecies): Pokemon => {
       return {
         ...poke,
         caught: caughtStatus(poke.id),
@@ -85,12 +84,13 @@ export const rawToProcessedAtom = atom(async (get) => {
           front_default: poke.pokemon_v2_pokemons[0].pokemon_v2_pokemonsprites[0].sprites.front_default,
           front_shiny: poke.pokemon_v2_pokemons[0].pokemon_v2_pokemonsprites[0].sprites.front_shiny
         },
-        types: [...poke.pokemon_v2_pokemons[0].pokemon_v2_pokemontypes.map((item) => item.pokemon_v2_type?.name)],
-        regions: [...poke.pokemon_v2_pokemondexnumbers.map((item) => item.pokemon_v2_pokedex?.name)]
+        types: [...poke.pokemon_v2_pokemons[0].pokemon_v2_pokemontypes.map((item: Pokemon_V2_Pokemontype) => item.pokemon_v2_type?.name)],
+        regions: [...poke.pokemon_v2_pokemondexnumbers.map((item: Pokemon_V2_Pokemondexnumber) => item.pokemon_v2_pokedex?.name)]
       }
     })
   }
 })
+rawToProcessedAtom.debugLabel = 'rawToProcessedAtom'
 
 export const rawToProcessedVersionListAtom = atom(async (get) => {
   const res = await get(rawVersionList);
@@ -100,41 +100,9 @@ export const rawToProcessedVersionListAtom = atom(async (get) => {
   }
 })
 
-// Typegen
-
-graphql(/* GraphQL */`
-query allPokemonSpeciesWithSprites{
-  pokemon_v2_pokemonspecies(order_by: {id: asc}) {
-    name
-    id
-    pokemon_v2_pokemondexnumbers {
-      pokemon_v2_pokedex {
-        name
-        id
-        is_main_series
-      }
-    }
-    pokemon_v2_pokemons {
-      pokemon_v2_pokemonsprites {
-        sprites(path: "other.official-artwork")
-      }
-      pokemon_v2_pokemontypes {
-        pokemon_v2_type {
-          name
-          generation_id
-        }
-      }
-    }
-    has_gender_differences
-    capture_rate
-    base_happiness
-  }
-}
-`)
-
 export const rawPokemonList = atomWithQuery<AllPokemonSpeciesWithSpritesQuery>({
-  query: `
-    query {
+  query: gql`
+    query allPokemonSpeciesWithSprites {
       pokemon_v2_pokemonspecies(order_by: {id: asc}) {
         name
         id
@@ -166,7 +134,8 @@ export const rawPokemonList = atomWithQuery<AllPokemonSpeciesWithSpritesQuery>({
 
 // Typegen
 
-graphql(/* GraphQL */`
+export const rawVersionList = atomWithQuery<AllVersionsEnglishNamesQuery>({
+  query: gql`
   query allVersionsEnglishNames {
     pokemon_v2_versionname(where: {language_id: {_eq: 9}}) {
       name
@@ -175,17 +144,23 @@ graphql(/* GraphQL */`
       version_id
     }
   }
-`)
-
-export const rawVersionList = atomWithQuery<AllVersionsEnglishNamesQuery>({
-  query: `
-    query {
-      pokemon_v2_versionname(where: {language_id: {_eq: 9}}) {
-        name
-        id
-        language_id
-        version_id
-      }
-    }
-  `
+`
 })
+
+// const cache = new InMemoryCache();
+// const client = new ApolloClient({ cache: cache, uri: 'https://beta.pokeapi.co/graphql/v1beta' });
+
+// const rawVersionListQuery = gql`
+// query allVersionsEnglishNames {
+//   pokemon_v2_versionname(where: {language_id: {_eq: 9}}) {
+//     name
+//     id
+//     language_id
+//     version_id
+//   }
+// }
+// `
+
+// const rawVersionListQueryAtom = atomWithQuery(
+//   (get) => ({ rawVersionListQuery }),
+// )

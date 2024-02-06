@@ -1,11 +1,8 @@
-query {
-    pokemon_v2_pokemonspecies {
+query allVersionsEnglishNames {
+    pokemon_v2_versionname(where: { language_id: { _eq: 9 } }) {
         name
         id
-        pokemon_v2_pokemons {
-            pokemon_v2_pokemonsprites {
-                sprites
-            }
-        }
+        language_id
+        version_id
     }
 }

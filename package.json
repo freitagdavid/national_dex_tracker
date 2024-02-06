@@ -11,6 +11,7 @@
         "codegen": "graphql-codegen"
     },
     "dependencies": {
+        "@apollo/client": "^3.9.2",
         "@emotion/react": "^11.11.3",
         "@neutrixs/colorthief": "^2.5.0",
         "@radix-ui/react-checkbox": "^1.0.4",
@@ -26,6 +27,7 @@
         "clsx": "^2.1.0",
         "color.js": "^1.2.0",
         "jotai": "^2.6.4",
+        "jotai-apollo": "^0.2.1",
         "jotai-devtools": "^0.7.1",
         "jotai-urql": "^0.7.1",
         "lucide-react": "^0.321.0",

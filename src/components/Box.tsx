@@ -1,14 +1,13 @@
-import { Pokemon_V2_Pokemonspecies } from "@/gql/graphql";
 import { PokemonCard } from "./PokemonCard";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 import { Progress } from "./ui/progress";
 import { Atom, useAtom } from "jotai";
-import { boxCaughtAtom } from "@/state";
+import { Pokemon, boxCaughtAtom } from "@/state";
 import { useState } from "react";
 import { FaChevronUp } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 
-export const Box = ({ box, boxNum }: { box: Atom<Pokemon_V2_Pokemonspecies>[]; boxNum: number }) => {
+export const Box = ({ box, boxNum }: { box: Atom<Pokemon>[]; boxNum: number }) => {
 
   const [caught] = useAtom(boxCaughtAtom(boxNum));
   const caughtPercent = (caught / 30) * 100;

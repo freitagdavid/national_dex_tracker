@@ -6,35 +6,23 @@ import { useEffect, useState } from "react";
 import { prominent } from 'color.js'
 import { Pokemon } from "@/state";
 
-const useColor = (img) => {
-    const [palette, setPalette] = useState([]);
-
-    useEffect(() => {
-        const getColors = async () => {
-            const palette = await prominent(img);
-            setPalette(palette);
-        };
-        getColors();
-    }, [img])
-    return palette;
-}
-
 export const PokemonListItem = ({ poke }: { poke: Atom<Pokemon>; key: number }) => {
+    poke.debugLabel = 'PokemonListItem'
     const [pokemon] = useAtom(poke);
     const [caught, setCaught] = useAtom(pokemon.caught);
     // const colorPalette = useColor(pokemon.sprites.front_default);
     const [palette, setPalette] = useState([]);
 
-    useEffect(() => {
-        prominent(pokemon.sprites.front_default).then((palette) => { setPalette(palette) })
-    }, [pokemon])
+    // useEffect(() => {
+    //     prominent(pokemon.sprites.front_default).then((palette) => { setPalette(palette) })
+    // }, [pokemon])
 
     const handleCaught = () => {
         setCaught({ caught: !caught })
     }
 
     return (
-        <div className="pl-5 rounded-lg flex shadow-md" style={{ backgroundColor: `rgb(${palette[2]})` }}>
+        <div className="pl-5 rounded-lg flex shadow-md" >
             <div className="w-full flex flex-col justify-between py-4">
                 <div className="flex w-full justify-between items-center">
                     <div className="flex gap-2">
