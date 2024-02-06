@@ -1,6 +1,7 @@
 import { listTypeAtom, rawToProcessedVersionListAtom, selectedGameAtom, selectedRegionAtom } from "@/state/atoms";
 import { Menubar, MenubarContent, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarTrigger } from "./ui/menubar";
 import { useAtom } from "jotai";
+import { Pokemon_V2_Versionname } from "@/gql/graphql";
 
 export const AppBar = () => {
     const [layout, setLayout] = useAtom(listTypeAtom);
@@ -47,10 +48,10 @@ export const AppBar = () => {
                 <MenubarContent>
                     <MenubarRadioGroup value={selectedGame}>
                         {
-                            versions[0].map((version) => {
+                            versions[0].map((version: Pokemon_V2_Versionname) => {
                                 return (
                                     // <div>{JSON.stringify(version.name)}</div>
-                                    <MenubarRadioItem onClick={() => setSelectedGame(version.version_id)} value={version.version_id}>
+                                    <MenubarRadioItem onClick={() => setSelectedGame(version.version_id || 0)} value={version.version_id}>
                                         {version.name}
                                     </MenubarRadioItem>
                                 )
