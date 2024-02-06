@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: "https://freitagdavid.github.io/national_dex_tracker/",
+    base: "/national_dex_tracker/",
     plugins: [
         react({
             babel: {
