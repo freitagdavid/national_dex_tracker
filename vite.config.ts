@@ -1,23 +1,24 @@
-import path from "path";
-import react from "@vitejs/plugin-react";
-import jotaiDebugLabel from "jotai/babel/plugin-debug-label";
-import jotaiReactRefresh from "jotai/babel/plugin-react-refresh";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "tailwindcss";
+import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: "./",
-    plugins: [
-        react({
-            babel: {
-                plugins: [jotaiDebugLabel, jotaiReactRefresh],
-                presets: ["jotai/babel/preset"],
-            },
-        }),
-    ],
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "./src"),
+            "@App": path.resolve(__dirname, "./src/app"),
         },
     },
+    css: {
+        postcss: {
+            plugins: [tailwindcss()],
+        },
+    },
+    build: {
+        sourcemap: true,
+    },
+    publicDir: "public",
+    plugins: [react()],
 });

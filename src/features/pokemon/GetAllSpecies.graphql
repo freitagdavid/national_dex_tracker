@@ -1,0 +1,6 @@
+query GetAllSpecies {
+  pokemon_v2_pokemonspecies {
+    name
+    id
+  }
+}

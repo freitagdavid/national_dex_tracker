@@ -69,6 +69,10 @@
     }
 }
 
+.debug {
+    border: "red 1px solid";
+}
+
 @layer base {
     * {
         @apply border-border;
