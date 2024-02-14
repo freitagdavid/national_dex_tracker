@@ -9,14 +9,19 @@
  * for this file to be re-created
  */
 
-import * as Types from '../../@App/services/types.generated';
+import * as Types from "@App/services/types.generated";
 
-import { api } from '@App/services/baseApi';
-export type GetAllSpeciesQueryVariables = Types.Exact<{ [key: string]: never; }>;
+import { api } from "@App/services/baseApi";
+export type GetAllSpeciesQueryVariables = Types.Exact<{ [key: string]: never }>;
 
-
-export type GetAllSpeciesQuery = { __typename?: 'query_root', pokemon_v2_pokemonspecies: Array<{ __typename?: 'pokemon_v2_pokemonspecies', name: string, id: number }> };
-
+export type GetAllSpeciesQuery = {
+    __typename?: "query_root";
+    pokemon_v2_pokemonspecies: Array<{
+        __typename?: "pokemon_v2_pokemonspecies";
+        name: string;
+        id: number;
+    }>;
+};
 
 export const GetAllSpeciesDocument = `
     query GetAllSpecies {
@@ -28,13 +33,19 @@ export const GetAllSpeciesDocument = `
     `;
 
 const injectedRtkApi = api.injectEndpoints({
-  endpoints: (build) => ({
-    GetAllSpecies: build.query<GetAllSpeciesQuery, GetAllSpeciesQueryVariables | void>({
-      query: (variables) => ({ document: GetAllSpeciesDocument, variables })
+    endpoints: (build) => ({
+        GetAllSpecies: build.query<
+            GetAllSpeciesQuery,
+            GetAllSpeciesQueryVariables | void
+        >({
+            query: (variables) => ({
+                document: GetAllSpeciesDocument,
+                variables,
+            }),
+        }),
     }),
-  }),
 });
 
 export { injectedRtkApi as api };
-export const { useGetAllSpeciesQuery, useLazyGetAllSpeciesQuery } = injectedRtkApi;
-
+export const { useGetAllSpeciesQuery, useLazyGetAllSpeciesQuery } =
+    injectedRtkApi;

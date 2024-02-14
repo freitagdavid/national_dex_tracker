@@ -12,32 +12,21 @@
 import * as Types from "@App/services/types.generated";
 
 import { api } from "@App/services/baseApi";
+import {
+    Exact,
+    Pokemon_V2_Pokemonspecies_Bool_Exp,
+} from "@App/services/types.generated";
 export type GetFilteredPokemonQueryVariables = Types.Exact<{
-    versionGroupId?: Types.InputMaybe<Types.Scalars["Int"]["input"]>;
-    generationId?: Types.InputMaybe<Types.Scalars["Int"]["input"]>;
-    typeId?: Types.InputMaybe<Types.Scalars["Int"]["input"]>;
+    pokemonV2PokemonspeciesWhere?: Types.InputMaybe<Types.Pokemon_V2_Pokemonspecies_Bool_Exp>;
+    spritesPath?: Types.InputMaybe<Types.Scalars["String"]["input"]>;
 }>;
 
 export type GetFilteredPokemonQuery = {
     __typename?: "query_root";
     pokemon_v2_pokemonspecies: Array<{
         __typename?: "pokemon_v2_pokemonspecies";
-        base_happiness?: number;
-        capture_rate?: number;
-        evolution_chain_id?: number;
-        evolves_from_species_id?: number;
-        forms_switchable: boolean;
-        gender_rate?: number;
-        generation_id?: number;
-        growth_rate_id?: number;
-        has_gender_differences: boolean;
-        hatch_counter?: number;
-        id: number;
-        is_baby: boolean;
-        is_legendary: boolean;
-        is_mythical: boolean;
         name: string;
-        order?: number;
+        id: number;
         pokemon_v2_pokemons: Array<{
             __typename?: "pokemon_v2_pokemon";
             pokemon_v2_pokemontypes: Array<{
@@ -57,27 +46,35 @@ export type GetFilteredPokemonQuery = {
     }>;
 };
 
+export interface FilteredPokemonItem {
+    __typename?: "pokemon_v2_pokemonspecies";
+    id: number;
+    name: string;
+    pokemon_v2_pokemons: Array<{
+        __typename?: "pokemon_v2_pokemon";
+        pokemon_v2_pokemontypes: Array<{
+            __typename?: "pokemon_v2_pokemontype";
+            id: number;
+            pokemon_id?: number;
+            slot: number;
+            type_id?: number;
+        }>;
+        pokemon_v2_pokemonsprites: Array<{
+            __typename?: "pokemon_v2_pokemonsprites";
+            sprites: {
+                front_default: "string";
+            };
+            pokemon_id?: number;
+            id: number;
+        }>;
+    }>;
+}
+
 export const GetFilteredPokemonDocument = `
-    query GetFilteredPokemon($versionGroupId: Int, $generationId: Int, $typeId: Int) {
-  pokemon_v2_pokemonspecies(
-    where: {generation_id: {_eq: $generationId}, pokemon_v2_generation: {pokemon_v2_versiongroups: {id: {_eq: $generationId}}}, pokemon_v2_pokemons: {pokemon_v2_pokemontypes: {type_id: {_eq: $typeId}}}}
-  ) {
-    base_happiness
-    capture_rate
-    evolution_chain_id
-    evolves_from_species_id
-    forms_switchable
-    gender_rate
-    generation_id
-    growth_rate_id
-    has_gender_differences
-    hatch_counter
-    id
-    is_baby
-    is_legendary
-    is_mythical
+    query GetFilteredPokemon($pokemonV2PokemonspeciesWhere: pokemon_v2_pokemonspecies_bool_exp, $spritesPath: String) {
+  pokemon_v2_pokemonspecies(where: $pokemonV2PokemonspeciesWhere, order_by: {order: asc} ) {
     name
-    order
+    id
     pokemon_v2_pokemons {
       pokemon_v2_pokemontypes {
         id
@@ -86,7 +83,7 @@ export const GetFilteredPokemonDocument = `
         type_id
       }
       pokemon_v2_pokemonsprites {
-        sprites(path: "other.official-artwork")
+        sprites(path: $spritesPath)
         pokemon_id
         id
       }
@@ -112,3 +109,48 @@ const injectedRtkApi = api.injectEndpoints({
 export { injectedRtkApi as api };
 export const { useGetFilteredPokemonQuery, useLazyGetFilteredPokemonQuery } =
     injectedRtkApi;
+
+export const constructVariables = ([
+    generationId,
+    versionGroupId,
+    typeId,
+    spritesPath = "other.official-artwork",
+]: [number | null, number | null, number | null, string | null]): void | Exact<{
+    pokemonV2PokemonspeciesWhere?:
+        | Pokemon_V2_Pokemonspecies_Bool_Exp
+        | undefined;
+}> => {
+    let returnObject = {};
+
+    if (generationId) {
+        returnObject = {
+            ...returnObject,
+            generation_id: { _eq: generationId },
+        };
+    }
+
+    if (versionGroupId) {
+        returnObject = {
+            ...returnObject,
+            pokemon_v2_generation: {
+                pokemon_v2_versiongroups: { id: { _eq: versionGroupId } },
+            },
+        };
+    }
+
+    if (typeId) {
+        returnObject = {
+            ...returnObject,
+            pokemon_v2_pokemons: {
+                pokemon_v2_pokemontypes: { type_id: { _eq: typeId } },
+            },
+        };
+    }
+
+    returnObject = {
+        pokemonV2PokemonspeciesWhere: returnObject,
+        spritesPath,
+    };
+
+    return returnObject;
+};

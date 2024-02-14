@@ -10,6 +10,21 @@ interface CaughtState {
     generationId: number | null;
     versionGroupId: number | null;
     typeId: number | null;
+    pokemonFilter: {
+        spritesPath: string;
+        pokemonV2PokemonspeciesWhere: {
+            generation_id?: {
+                _eq?: number;
+            };
+            pokemon_v2_generation?: {
+                pokemon_v2_versiongroups?: {
+                    id?: {
+                        _eq?: number;
+                    };
+                };
+            };
+        };
+    };
 }
 
 const initialState: CaughtState = {
@@ -19,6 +34,10 @@ const initialState: CaughtState = {
     generationId: null,
     versionGroupId: null,
     typeId: null,
+    pokemonFilter: {
+        pokemonV2PokemonspeciesWhere: {},
+        spritesPath: "other.official-artwork",
+    },
 };
 
 const caughtSlice = createSlice({
@@ -35,10 +54,28 @@ const caughtSlice = createSlice({
             state.caughtTotal--;
         },
         setGenerationId(state, action: PayloadAction<number>) {
-            state.generationId = action.payload;
+            state.pokemonFilter = {
+                ...state.pokemonFilter,
+                pokemonV2PokemonspeciesWhere: {
+                    ...state.pokemonFilter?.pokemonV2PokemonspeciesWhere,
+                    generation_id: {
+                        _eq: action.payload,
+                    },
+                },
+            };
         },
         setVersionGroupId(state, action: PayloadAction<number>) {
-            state.versionGroupId = action.payload;
+            state.pokemonFilter = {
+                ...state.pokemonFilter,
+                pokemonV2PokemonspeciesWhere: {
+                    ...state.pokemonFilter.pokemonV2PokemonspeciesWhere,
+                    pokemon_v2_generation: {
+                        pokemon_v2_versiongroups: {
+                            id: { _eq: action.payload },
+                        },
+                    },
+                },
+            };
         },
         setTypeId(state, action: PayloadAction<number>) {
             state.typeId = action.payload;
@@ -46,6 +83,7 @@ const caughtSlice = createSlice({
     },
 });
 
-export const { toggle } = caughtSlice.actions;
+export const { toggle, setGenerationId, setVersionGroupId, setTypeId } =
+    caughtSlice.actions;
 
 export default caughtSlice.reducer;

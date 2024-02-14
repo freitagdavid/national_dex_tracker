@@ -1,12 +1,11 @@
-import { useState } from 'react'
 import './App.css'
 import { AppBar } from './components/AppBar'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import BoxLayout from './pages/BoxLayout'
 import ListLayout from './pages/ListLayout'
 
 function App() {
-  const [count, setCount] = useState(0)
+  // const [count, setCount] = useState(0)
 
   return (
     <>

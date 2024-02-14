@@ -809,6 +809,18 @@
     auto-bind "~4.0.0"
     tslib "~2.6.0"
 
+"@graphql-codegen/typescript-resolvers@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.npmjs.org/@graphql-codegen/typescript-resolvers/-/typescript-resolvers-4.0.4.tgz"
+  integrity sha512-o1FEbvoTgF32n2YL8dJmtRYlIjKy16hyQz+co5Mj9yR9c1CtWrvjnlB7WeTAVJRhasqYloXXfLXb+efhMkUl9A==
+  dependencies:
+    "@graphql-codegen/plugin-helpers" "^5.0.3"
+    "@graphql-codegen/typescript" "^4.0.4"
+    "@graphql-codegen/visitor-plugin-common" "4.1.2"
+    "@graphql-tools/utils" "^10.0.0"
+    auto-bind "~4.0.0"
+    tslib "~2.6.0"
+
 "@graphql-codegen/typescript-rtk-query@^3.1.1":
   version "3.1.1"
   resolved "https://registry.npmjs.org/@graphql-codegen/typescript-rtk-query/-/typescript-rtk-query-3.1.1.tgz"
@@ -5373,6 +5385,11 @@ prelude-ls@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.2.1.tgz"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
+
+prettier@3.2.5:
+  version "3.2.5"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-3.2.5.tgz"
+  integrity sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==
 
 promise@^7.1.1:
   version "7.3.1"
