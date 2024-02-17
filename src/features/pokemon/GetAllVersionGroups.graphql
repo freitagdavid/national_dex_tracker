@@ -1,8 +1,0 @@
-query GetAllVersionGroups {
-    pokemon_v2_versiongroup {
-        order
-        name
-        id
-        generation_id
-    }
-}

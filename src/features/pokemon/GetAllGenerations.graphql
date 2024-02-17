@@ -1,7 +1,0 @@
-query GetAllGenerations {
-    pokemon_v2_generation {
-        id
-        name
-        region_id
-    }
-}

@@ -1,8 +1,0 @@
-query GetAllTypes {
-    pokemon_v2_type {
-        id
-        name
-        move_damage_class_id
-        generation_id
-    }
-}
