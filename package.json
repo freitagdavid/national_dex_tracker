@@ -3,19 +3,30 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "@rmwc/top-app-bar": "^5.7.0",
+        "@material/dom": "^14.0.0",
+        "@material/icon-button": "^14.0.0",
+        "@material/ripple": "^14.0.0",
+        "@material/top-app-bar": "^14.0.0",
+        "@reduxjs/toolkit": "^2.3.0",
+        "@rmwc/base": "^14.3.4",
+        "@rmwc/provider": "^14.3.4",
+        "@rmwc/top-app-bar": "latest",
+        "@types/styled-components": "^5.1.34",
         "metro4": "^4.3.4",
         "metro4-react": "^0.1.2",
         "overmind": "^20.0.0",
         "overmind-react": "^21.0.0",
         "page": "^1.11.5",
         "pokeapi-js-wrapper": "^1.1.2",
-        "react": "^16.12.0",
-        "react-dom": "^16.12.0",
-        "react-scripts": "^3.2.0",
+        "react": "latest",
+        "react-dom": "latest",
+        "react-redux": "^9.1.2",
+        "react-scripts": "latest",
         "rmwc": "^5.7.1",
-        "styled-components": "^4.4.1",
-        "typescript": "^3.5.3"
+        "styled-components": "^4.4.1"
+    },
+    "devDependencies": {
+        "typescript": "^5.6.3"
     },
     "scripts": {
         "start": "react-scripts start",

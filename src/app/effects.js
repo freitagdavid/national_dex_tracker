@@ -1,4 +1,3 @@
-import page from 'page'
 import { nationalDex } from "../data/nationalDex"
 import { Pokedex } from "pokeapi-js-wrapper"
 

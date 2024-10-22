@@ -1,15 +1,21 @@
 import React, { Suspense } from "react";
 import styled from "styled-components";
-import { useApp } from "../../app/"
-// import Box from "../Box";
+import { useGetNumPokemonSpeciesQuery } from "../../features/pokedex/pokeApiSlice";
+import Box from "../Box";
 
-const Box = React.lazy(() => import("../Box"));
+// const Box = React.lazy(() => import("../Box"));
 
-const BoxList = props => {
-    const { state } = useApp();
-    const { className } = props;
+interface Props {
+    className?: string;
+}
+
+const BoxList = ({className}: Props) => {
     let boxes = [];
-    let numBoxes = state.numBoxes
+    const numSpecies = useGetNumPokemonSpeciesQuery();
+    const numBoxes = Math.ceil((numSpecies?.data || 0) /30);
+
+
+
     for (let i = 0; i < numBoxes; i++) {
         boxes.push(<Box id={ `box-${i}` } boxNum={ i } key={ i } />);
     }

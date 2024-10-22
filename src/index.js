@@ -1,29 +1,19 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import {createRoot} from 'react-dom/client';
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import { Provider as OMProvider } from 'overmind-react'
-import { config } from "./app/"
-import { createOvermind } from "overmind";
-import { RMWCProvider } from '@rmwc/provider'
+import {store} from './app/store';
+import { Provider as ReduxProvider } from "react-redux";
 
-// const store = createStore(rootReducer, applyMiddleware(thunk, logger));
+const container = document.getElementById('root');
 
-export const overmind = createOvermind(config, {
-    devtools: true
-})
+const root = createRoot(container);
 
-ReactDOM.render(
-    <OMProvider value={ overmind }>
-        <RMWCProvider>
+root.render(
+        <ReduxProvider store={store} >
             <App />
-        </RMWCProvider>
-    </OMProvider>,
-    document.getElementById("root")
+        </ReduxProvider>
 );
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();

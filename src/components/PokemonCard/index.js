@@ -1,27 +1,21 @@
 import React from "react";
-import { useApp } from "../../app/"
+// import { useApp } from "../../app/"
 import { pad } from "../../helpers"
 import styled from "styled-components"
 
 function Card(props) {
-    const { actions } = useApp();
+    // const { actions } = useApp();
     const {
         pokeNum,
         pokemon,
         updateProgress,
         className
     } = props;
-    let image;
-    try {
-        image = require(`../../img/pokedex/${pad(pokeNum + 1, 3, "0")}.png`);
-    } catch (e) {
-        // image = pokemon.sprites.front_default;
-    }
 
-    console.log(pad(pokeNum + 1, 3, "0"))
+    // console.log(pad(pokeNum + 1, 3, "0"))
 
     const onClick = () => {
-        actions.togglePokemon(pokeNum);
+        // actions.togglePokemon(pokeNum);
         updateProgress();
     }
 
