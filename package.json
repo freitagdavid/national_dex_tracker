@@ -18,18 +18,22 @@
         "format": "npx biome format",
         "format:fix": "npx biome format --write",
         "check": "npx biome check",
-        "check:fix": "npx biome check --write"
+        "check:fix": "npx biome check --write",
+        "graphql-codegen": "graphql-codegen --config codegen.ts"
     },
     "jest": {
         "preset": "jest-expo"
     },
     "dependencies": {
         "@biomejs/biome": "^1.9.4",
+        "@graphql-codegen/near-operation-file-preset": "^3.0.0",
         "@react-navigation/native": "^6.1.17",
         "@reduxjs/toolkit": "^2.3.0",
+        "@rtk-query/graphql-request-base-query": "^2.3.1",
         "@tamagui/config": "^1.116.14",
-        "@tamagui/lucide-icons": "^1.116.14",
+        "@tamagui/lucide-icons": "^1.116.15",
         "@tamagui/toast": "^1.116.14",
+        "async-mutex": "^0.5.0",
         "babel-preset-expo": "^11.0.6",
         "burnt": "^0.12.2",
         "expo": "~51.0.32",
@@ -53,9 +57,15 @@
         "tamagui": "^1.116.14"
     },
     "devDependencies": {
+        "@0no-co/graphqlsp": "^1.12.16",
         "@babel/core": "^7.24.6",
         "@expo/metro-config": "~0.18.4",
         "@expo/metro-runtime": "~3.2.1",
+        "@graphql-codegen/cli": "^5.0.3",
+        "@graphql-codegen/schema-ast": "^4.1.0",
+        "@graphql-codegen/typescript-resolvers": "^4.4.0",
+        "@graphql-codegen/typescript-rtk-query": "^3.1.1",
+        "@parcel/watcher": "^2.5.0",
         "@tamagui/babel-plugin": "^1.116.14",
         "@tamagui/cli": "^1.116.14",
         "@tamagui/metro-plugin": "^1.116.14",

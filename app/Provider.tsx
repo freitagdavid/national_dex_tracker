@@ -4,7 +4,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { TamaguiProvider, type TamaguiProviderProps } from 'tamagui';
 import { config } from '../tamagui.config';
 import { CurrentToast } from './CurrentToast';
-import { store } from './store';
+import { store } from '../store';
 
 export function Provider({
     children,

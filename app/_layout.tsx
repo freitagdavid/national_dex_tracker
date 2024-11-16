@@ -9,18 +9,14 @@ import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
-import { useTheme } from 'tamagui';
+import { Text, useTheme } from 'tamagui';
 import { Provider } from './Provider';
+import LeftHeader from 'components/LeftHeader';
 
 export {
     // Catch any errors thrown by the Layout component.
     ErrorBoundary,
 } from 'expo-router';
-
-export const unstable_settings = {
-    // Ensure that reloading on `/modal` keeps a back button present.
-    initialRouteName: '(tabs)',
-};
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -65,27 +61,7 @@ function RootLayoutNav() {
                     colorScheme === 'dark' ? 'light-content' : 'dark-content'
                 }
             />
-            <Stack>
-                <Stack.Screen
-                    name='(tabs)'
-                    options={{
-                        headerShown: false,
-                    }}
-                />
-
-                <Stack.Screen
-                    name='modal'
-                    options={{
-                        title: 'Tamagui + Expo',
-                        presentation: 'modal',
-                        animation: 'slide_from_right',
-                        gestureEnabled: true,
-                        gestureDirection: 'horizontal',
-                        contentStyle: {
-                            backgroundColor: theme.background.val,
-                        },
-                    }}
-                />
+            <Stack screenOptions={{headerLeft: () => <LeftHeader />}}>
             </Stack>
         </ThemeProvider>
     );

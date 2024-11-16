@@ -1,0 +1,29 @@
+# ./dev-test/githunt/types.rtk-query.ts:
+#     schema: https://beta.pokeapi.co/graphql/v1beta
+#     documents: ./**/*.gql
+#     plugins:
+#       - typescript
+#       - typescript-operations
+#       - typescript-rtk-query
+#     config:
+#       importBaseApiFrom: '../../packages/plugins/typescript/rtk-query/tests/baseApi'
+#       exportHooks: true
+
+
+schema: https://beta.pokeapi.co/graphql/v1beta
+overwrite: true
+documents: ./**/*.gql
+generates:
+  # services/types.generated.ts:
+  #   plugins:
+  #   - typescript
+  ./graphql/:
+    preset: client
+    plugins:
+    - typescript
+    - typescript-resolvers
+    - typescript-rtk-query
+    config:
+      importBaseApiFrom: ./services/pokemon.ts
+      exportHooks: true
+      importBaseApiAlternateName: 'pokemonApi'
