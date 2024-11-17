@@ -1,7 +1,9 @@
-import { useGetAllPokemonQuery } from 'api';
+import type { Pokemon_V2_Pokemon } from 'api';
 import { useNavigation } from 'expo-router';
 import { useEffect } from 'react';
-import { View, Text } from 'tamagui';
+import { FlatList } from 'react-native';
+import { useGetAllPokemonQuery } from 'services/pokemon';
+import { View, Text, ListItem, Card } from 'tamagui';
 
 export default function Pokedex() {
     const navigation = useNavigation();
@@ -15,8 +17,21 @@ export default function Pokedex() {
         console.log(data);
     }, [data]);
     return (
-        <View>
-            <Text>Pokedex</Text>
+        <View height='100%'>
+            {isLoading && <Text>Loading...</Text>}
+            {data && (
+                <FlatList
+                    scrollEnabled={true}
+                    data={data.pokemon_v2_pokemon}
+                    renderItem={({ item }) => (
+                        <Card key={item.name}>
+                            <Card.Header>
+                                <Text>{item.name}</Text>
+                            </Card.Header>
+                        </Card>
+                    )}
+                />
+            )}
         </View>
     );
 }

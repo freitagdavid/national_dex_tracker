@@ -9,9 +9,10 @@ import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
-import { Text, useTheme } from 'tamagui';
+import { Text, useTheme, View } from 'tamagui';
 import { Provider } from './Provider';
 import LeftHeader from 'components/LeftHeader';
+import Header from 'components/Header';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -61,8 +62,11 @@ function RootLayoutNav() {
                     colorScheme === 'dark' ? 'light-content' : 'dark-content'
                 }
             />
-            <Stack screenOptions={{headerLeft: () => <LeftHeader />}}>
-            </Stack>
+            <Stack
+                screenOptions={{
+                    header: (props) => <Header {...props} />,
+                }}
+            />
         </ThemeProvider>
     );
 }

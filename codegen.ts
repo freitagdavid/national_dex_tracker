@@ -5,7 +5,6 @@ const config: CodegenConfig = {
     documents: './**/*.gql',
     // ignoreNoDocuments: true,
     overwrite: true,
-    watch: true,
     generates: {
         // 'services/types.generated.ts': {
         //     plugins: ['typescript'],
