@@ -1,37 +1,33 @@
-import type { Pokemon_V2_Pokemon } from 'api';
-import { useNavigation } from 'expo-router';
-import { useEffect } from 'react';
+import { Box } from '@/components/ui/box';
+import { Card } from '@/components/ui/card';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { useGetAllPokemonQuery } from '@/services/pokemon';
+import React from 'react';
 import { FlatList } from 'react-native';
-import { useGetAllPokemonQuery } from 'services/pokemon';
-import { View, Text, ListItem, Card } from 'tamagui';
 
-export default function Pokedex() {
-    const navigation = useNavigation();
-    const { data, error, isLoading } = useGetAllPokemonQuery('');
-    useEffect(() => {
-        navigation.setOptions({
-            title: 'Pokedex',
-        });
-    });
-    useEffect(() => {
-        console.log(data);
-    }, [data]);
+function renderItem({ item }) {
     return (
-        <View height='100%'>
+        <Card>
+            <Heading>{item.name}</Heading>
+        </Card>
+    );
+}
+
+export default function Index() {
+    const { data, error, isLoading } = useGetAllPokemonQuery();
+    console.log(data);
+    return (
+        <Box className='bg-background-50 flex-1 items-center justify-center'>
+            <Text>Home screen</Text>
             {isLoading && <Text>Loading...</Text>}
             {data && (
                 <FlatList
                     scrollEnabled={true}
                     data={data.pokemon_v2_pokemon}
-                    renderItem={({ item }) => (
-                        <Card key={item.name}>
-                            <Card.Header>
-                                <Text>{item.name}</Text>
-                            </Card.Header>
-                        </Card>
-                    )}
+                    renderItem={renderItem}
                 />
             )}
-        </View>
+        </Box>
     );
 }

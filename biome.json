@@ -4,8 +4,7 @@
         "enabled": true
     },
     "files": {
-        "maxSize": 1500000,
-        "ignore": ["./.tamagui"]
+        "maxSize": 1500000
     },
     "linter": {
         "enabled": true,
@@ -22,7 +21,10 @@
         "indentStyle": "space",
         "indentWidth": 4,
         "lineWidth": 80,
-        "ignore": ["**/*/generated-new.ts", "**/*/generated-v2.ts"]
+        "ignore": [
+            "**/*/generated-new.ts",
+            "**/*/generated-v2.ts"
+        ]
     },
     "javascript": {
         "formatter": {
