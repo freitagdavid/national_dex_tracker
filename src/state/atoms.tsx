@@ -4,14 +4,45 @@ import { atomFamily, atomWithStorage, splitAtom } from 'jotai/utils';
 import { Atom, atom } from 'jotai';
 import { gql } from 'urql';
 
-export const caughtStatusFamily = atomFamily((id: number) => atomWithStorage<boolean>(`caught-${id}`, false));
-export const caughtNumber = atomWithStorage('caughtNumber', 0)
+import { observable } from "@legendapp/state";
 
-export const numPokemonAtom = atom(
-  (get) => get(pokemonAtomsAtom).length || 0
-)
+// Type your Store interface
+interface Todo {
+  id: number;
+  text: string;
+  completed?: boolean;
+}
 
-export const listTypeAtom = atomWithStorage<'grid' | 'list' | 'box'>('listLayout', 'box')
+interface Store {
+  pokemon: Pokemon[];
+  caughtStatus: boolean[];
+  caughtNumber: number;
+  listType: 'box' | 'list' | 'grid';
+  numPokemon: () => number;
+  numBoxes: () => number;
+  getCaughtStatus: (id: number) => boolean;
+}
+
+// Create a global observable for the Todos
+let nextId = 0;
+const store$ = observable<Store>({
+  pokemon: [],
+  caughtStatus: [],
+  caughtNumber: 0,
+  listType: 'box',
+  numPokemon: (): number => store$.pokemon.get().length,
+  numBoxes: (): number => Math.ceil(store$.numPokemon() / 30),
+  getCaughtStatus: (id: number): boolean => store$.caughtStatus[id]?.get() || false,
+});
+
+// export const caughtStatusFamily = atomFamily((id: number) => atomWithStorage<boolean>(`caught-${id}`, false));
+// export const caughtNumber = atomWithStorage('caughtNumber', 0)
+
+// export const numPokemonAtom = atom(
+//   (get) => get(pokemonAtomsAtom).length || 0
+// )
+
+// export const listTypeAtom = atomWithStorage<'grid' | 'list' | 'box'>('listLayout', 'box')
 
 export const numBoxesAtom = atom(
   (get) => Math.ceil(get(numPokemonAtom) / 30)
