@@ -55,3 +55,74 @@ export type SpeciesQueryRow = {
 export type AllPokemonSpeciesWithSpritesQuery = {
   pokemon_v2_pokemonspecies: SpeciesQueryRow[] | null;
 };
+
+export type PokemonSpeciesDetailQuery = {
+  pokemon_v2_pokemonspecies: Array<{
+    id: number;
+    name: string;
+    gender_rate?: number | null;
+    capture_rate?: number | null;
+    base_happiness?: number | null;
+    hatch_counter?: number | null;
+    evolution_chain_id?: number | null;
+    pokemon_v2_generation?: {
+      id: number;
+      pokemon_v2_generationnames: Array<{ name: string }>;
+    } | null;
+    pokemon_v2_growthrate?: { name: string } | null;
+    pokemon_v2_pokemonspeciesnames: Array<{ name: string; genus: string }>;
+    pokemon_v2_pokemonspeciesflavortexts: Array<{
+      flavor_text: string;
+      version_id: number;
+      pokemon_v2_version?: {
+        id: number;
+        pokemon_v2_versionnames: Array<{ name: string }>;
+      } | null;
+    }>;
+    pokemon_v2_pokemoncolor?: { name: string } | null;
+    pokemon_v2_pokemonhabitat?: { name: string } | null;
+    pokemon_v2_pokemonshape?: { name: string } | null;
+    pokemon_v2_pokemonegggroups: Array<{ pokemon_v2_egggroup?: { name: string } | null }>;
+    pokemon_v2_evolutionchain?: {
+      id: number;
+      pokemon_v2_pokemonspecies: Array<{ id: number; name: string }>;
+    } | null;
+    pokemon_v2_pokemons: Array<{
+      id: number;
+      height?: number | null;
+      weight?: number | null;
+      base_experience?: number | null;
+      pokemon_v2_pokemonsprites?: Array<{ sprites?: unknown } | null> | null;
+      pokemon_v2_pokemonabilities: Array<{
+        is_hidden?: boolean | null;
+        slot?: number | null;
+        pokemon_v2_ability?: {
+          name: string;
+          pokemon_v2_abilitynames: Array<{ name: string }>;
+        } | null;
+      }>;
+      pokemon_v2_pokemonstats: Array<{
+        base_stat: number;
+        pokemon_v2_stat?: { name: string } | null;
+      }>;
+      pokemon_v2_pokemontypes: Array<{
+        slot?: number | null;
+        pokemon_v2_type?: { name: string } | null;
+      }>;
+    }>;
+  }> | null;
+};
+
+export type PokemonSpeciesMovesQuery = {
+  pokemon_v2_pokemonmove: Array<{
+    id: number;
+    level?: number | null;
+    order?: number | null;
+    move_learn_method_id?: number | null;
+    pokemon_v2_move?: {
+      id: number;
+      pokemon_v2_movenames: Array<{ name: string }>;
+    } | null;
+    pokemon_v2_movelearnmethod?: { name: string } | null;
+  }> | null;
+};

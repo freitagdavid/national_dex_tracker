@@ -1,4 +1,4 @@
-const GRAPHQL_URL = 'https://beta.pokeapi.co/graphql/v1beta';
+const GRAPHQL_URL = 'https://beta.pokeapi.co/graphql/v1beta2';
 
 export async function graphqlRequest<TData>(
   query: string,

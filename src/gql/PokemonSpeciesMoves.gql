@@ -1,0 +1,20 @@
+query PokemonSpeciesMoves($pokemonId: Int!, $versionGroupId: Int!) {
+  pokemon_v2_pokemonmove(
+    where: { pokemon_id: { _eq: $pokemonId }, version_group_id: { _eq: $versionGroupId } }
+    order_by: [{ move_learn_method_id: asc }, { level: asc }, { order: asc }]
+  ) {
+    id
+    level
+    order
+    move_learn_method_id
+    pokemon_v2_move {
+      id
+      pokemon_v2_movenames(where: { language_id: { _eq: 9 } }) {
+        name
+      }
+    }
+    pokemon_v2_movelearnmethod {
+      name
+    }
+  }
+}

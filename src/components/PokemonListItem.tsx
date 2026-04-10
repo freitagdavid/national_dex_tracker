@@ -1,12 +1,13 @@
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Circle, Star } from 'lucide-react';
-import { type Pokemon, app, setPokemonCaught, setPokemonFavorite } from '@/state';
+import { type Pokemon, app, openPokemonInfo, setPokemonCaught, setPokemonFavorite } from '@/state';
 import { useSelector } from '@legendapp/state/react';
 import { cn } from '@/lib/utils';
 import { usePokemonListImageTheme } from '@/hooks/usePokemonListImageTheme';
 import { useListDexDisplayLabel } from '@/hooks/useListDexDisplayLabel';
 import { usePokemonSpriteUrl } from '@/hooks/usePokemonSpriteUrl';
 import { Card } from './ui/card';
+import { Skeleton } from './ui/skeleton';
 
 function displaySpeciesName(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -16,6 +17,7 @@ function displaySpeciesName(name: string): string {
 function CaughtCutoutDisc({ fill, maskId }: { fill: string; maskId: string }) {
   return (
     <svg viewBox="0 0 28 28" className="h-5 w-5 shrink-0" aria-hidden>
+      <title>Caught mark</title>
       <defs>
         <mask id={maskId} maskUnits="userSpaceOnUse">
           <circle cx="14" cy="14" r="12" fill="white" />
@@ -46,10 +48,19 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
 
   return (
     <Card
+      role="button"
+      tabIndex={0}
       className={cn(
-        'relative flex min-h-26 overflow-hidden rounded-[1.35rem] border-0 py-0 pr-0 pl-4 shadow-md',
+        'relative flex min-h-26 cursor-pointer overflow-hidden rounded-[1.35rem] border-0 py-0 pr-0 pl-4 shadow-md',
       )}
       style={{ backgroundColor: theme.cardBg, color: theme.text }}
+      onClick={() => openPokemonInfo(poke.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPokemonInfo(poke.id);
+        }
+      }}
     >
       <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center gap-2 py-3 pr-1">
         <div className="flex min-w-0 items-center gap-2">
@@ -68,7 +79,10 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
               aria-pressed={favorite}
               className="rounded-full p-1.5 transition-opacity hover:opacity-80"
               style={{ color: theme.text }}
-              onClick={() => setPokemonFavorite(poke.id, !favorite)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPokemonFavorite(poke.id, !favorite);
+              }}
             >
               <Star
                 className="h-5 w-5"
@@ -82,7 +96,10 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
               aria-pressed={caught}
               className="rounded-full p-1.5 transition-opacity hover:opacity-80"
               style={caught ? undefined : { color: theme.text }}
-              onClick={() => setPokemonCaught(poke.id, !caught)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPokemonCaught(poke.id, !caught);
+              }}
             >
               {caught ? (
                 <CaughtCutoutDisc fill={theme.text} maskId={`list-caught-cutout-${poke.id}`} />
@@ -124,8 +141,36 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
           crossOrigin="anonymous"
           className="relative z-10 h-26 w-26 object-contain drop-shadow-sm"
           onLoad={(e) => onArtLoad(e.currentTarget)}
+          placeholder={<Skeleton className="h-26 w-26 rounded-lg bg-muted/80" aria-hidden />}
         />
       </div>
     </Card>
   );
 };
+
+/** Placeholder row matching list card layout (min height, art column width). */
+export function PokemonListItemSkeleton() {
+  return (
+    <Card className="relative flex min-h-26 overflow-hidden rounded-[1.35rem] border-0 bg-muted/40 py-0 pr-0 pl-4 shadow-md">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center gap-2 py-3 pr-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-baseline gap-2">
+            <Skeleton className="h-5 w-11 shrink-0 rounded" />
+            <Skeleton className="h-6 min-w-0 flex-1 max-w-[12rem] rounded-md" />
+          </div>
+          <div className="flex shrink-0 items-center gap-0.5 pr-1">
+            <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+            <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <Skeleton className="h-5 w-14 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+      </div>
+      <div className="relative flex w-[34%] max-w-34 min-w-25 shrink-0 items-center justify-center self-stretch">
+        <Skeleton className="h-26 w-26 shrink-0 rounded-lg" />
+      </div>
+    </Card>
+  );
+}

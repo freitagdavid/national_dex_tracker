@@ -106,6 +106,15 @@ const ui$ = observable({
   boxCaught: {} as Record<number, number>,
 });
 
+/** Pokémon info modal — not persisted (avoids restoring an open dialog). */
+const infoModal$ = observable({
+  open: false,
+  speciesId: null as number | null,
+  /** `0` = pick latest English flavor-text row by max `version_id`. */
+  selectedVersionId: 0,
+  movesOpen: false,
+});
+
 /** Server-backed query cache — not persisted. */
 const query$ = observable({
   speciesData: undefined as AllPokemonSpeciesWithSpritesQuery | undefined,
@@ -116,6 +125,7 @@ const query$ = observable({
 /** Single tree: composed from explicit `ui$` + `query$` children. */
 const state$ = observable({
   ui: ui$,
+  infoModal: infoModal$,
   query: query$,
 });
 
@@ -375,4 +385,29 @@ export function setPokemonFavorite(id: number, favorite: boolean) {
   const was = byId[id] ?? false;
   if (was === favorite) return;
   app.state.ui.favoriteById.assign({ ...byId, [id]: favorite });
+}
+
+export function openPokemonInfo(speciesId: number) {
+  batch(() => {
+    app.state.infoModal.open.set(true);
+    app.state.infoModal.speciesId.set(speciesId);
+    app.state.infoModal.selectedVersionId.set(0);
+    app.state.infoModal.movesOpen.set(false);
+  });
+}
+
+export function closePokemonInfo() {
+  batch(() => {
+    app.state.infoModal.open.set(false);
+    app.state.infoModal.speciesId.set(null);
+    app.state.infoModal.movesOpen.set(false);
+  });
+}
+
+export function setInfoModalVersion(versionId: number) {
+  app.state.infoModal.selectedVersionId.set(versionId);
+}
+
+export function setPokemonMovesModalOpen(open: boolean) {
+  app.state.infoModal.movesOpen.set(open);
 }

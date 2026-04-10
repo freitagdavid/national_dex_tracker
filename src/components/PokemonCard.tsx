@@ -2,7 +2,8 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
 import type { Pokemon } from '@/state';
-import { app, setPokemonCaught } from '@/state';
+import { app, openPokemonInfo, setPokemonCaught } from '@/state';
+import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
 import { useState } from 'react';
@@ -22,7 +23,7 @@ export const SkeletonCard = () => {
       </CardContent>
       <Separator />
       <CardFooter className="w-full flex justify-center pb-0 px-0">
-        <Skeleton className="w-full" />
+        <Skeleton className="h-9 w-full" />
       </CardFooter>
     </Card>
   );
@@ -43,9 +44,20 @@ export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number })
 
   return (
     <Card
-      className="aspect-square flex flex-col align-middle justify-between w-44 mt-3"
+      className="relative aspect-square flex flex-col align-middle justify-between w-44 mt-3"
       onClick={handleCaught}
     >
+      <button
+        type="button"
+        aria-label={`${poke.name} details`}
+        className="absolute top-1 right-1 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-border/80 bg-background/95 text-foreground shadow-sm transition-opacity hover:opacity-90"
+        onClick={(e) => {
+          e.stopPropagation();
+          openPokemonInfo(poke.id);
+        }}
+      >
+        <Info className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+      </button>
       <CardHeader className="py-2">
         <CardTitle className="w-full text-center">
           {poke.name.charAt(0).toUpperCase() + poke.name.slice(1)}

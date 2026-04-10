@@ -1,11 +1,16 @@
 import { useSelector } from '@legendapp/state/react';
+import { useQuery } from '@tanstack/react-query';
 import './App.css';
-import { app } from '@/state';
+import { app, SPECIES_QUERY } from '@/state';
+import { graphqlRequest } from '@/state/graphqlFetch';
+import type { AllPokemonSpeciesWithSpritesQuery } from '@/gql/operation-types';
 import { StatefuleProgress } from './components/StatefulProgress';
 import { Box } from './components/Box';
 import { AppBar } from './components/MenuBar';
 import { PokemonCard } from './components/PokemonCard';
 import { PokemonListItem } from './components/PokemonListItem';
+import { PokemonInfoModal } from './components/PokemonInfo/PokemonInfoModal';
+import { AppLoadingSkeleton } from './components/AppLoadingSkeleton';
 import { Card, CardHeader, CardTitle } from './components/ui/card';
 import { Separator } from './components/ui/separator';
 
@@ -14,8 +19,19 @@ function App() {
   const boxes = useSelector(() => app.boxes.get() ?? []);
   const layout = useSelector(() => app.state.ui.listLayout.get());
 
+  const speciesBootstrap = useQuery({
+    queryKey: ['graphql', 'pokemonSpecies'],
+    queryFn: () => graphqlRequest<AllPokemonSpeciesWithSpritesQuery>(SPECIES_QUERY),
+  });
+
+  const showMainSkeleton =
+    !speciesBootstrap.isError &&
+    !speciesBootstrap.data &&
+    (speciesBootstrap.isPending || speciesBootstrap.isFetching);
+
   return (
     <>
+      <PokemonInfoModal />
       <div className="w-screen h-screen">
         <div className="w-full">
           <Card className="w-full rounded-none border-x-0 border-t-0 shadow-md">
@@ -33,26 +49,37 @@ function App() {
           />
           <AppBar />
         </div>
-        {layout === 'box' && (
-          <div className="w-full flex flex-wrap overflow-scroll h-full justify-around">
-            {boxes.map((box, boxIndex) => (
-              <Box box={box} boxNum={boxIndex} key={boxIndex} />
-            ))}
+        {speciesBootstrap.isError && !speciesBootstrap.data ? (
+          <div className="flex h-full w-full items-center justify-center p-6 text-center text-destructive text-sm">
+            Could not load Pokémon data.
+            {speciesBootstrap.error instanceof Error ? ` ${speciesBootstrap.error.message}` : null}
           </div>
-        )}
-        {layout === 'grid' && (
-          <div className="w-full flex flex-wrap overflow-scroll h-full justify-around">
-            {pokemon.map((poke, index) => (
-              <PokemonCard poke={poke} key={poke.id} boxNum={Math.floor(index / 30)} />
-            ))}
-          </div>
-        )}
-        {layout === 'list' && (
-          <div className="flex h-full w-full flex-col gap-3 overflow-y-auto px-3 py-4 sm:px-4">
-            {pokemon.map((poke) => (
-              <PokemonListItem poke={poke} key={poke.id} />
-            ))}
-          </div>
+        ) : showMainSkeleton ? (
+          <AppLoadingSkeleton layout={layout} />
+        ) : (
+          <>
+            {layout === 'box' && (
+              <div className="flex h-full w-full flex-wrap justify-around overflow-y-scroll">
+                {boxes.map((box, boxIndex) => (
+                  <Box box={box} boxNum={boxIndex} key={boxIndex} />
+                ))}
+              </div>
+            )}
+            {layout === 'grid' && (
+              <div className="flex h-full w-full flex-wrap justify-around overflow-y-scroll">
+                {pokemon.map((poke, index) => (
+                  <PokemonCard poke={poke} key={poke.id} boxNum={Math.floor(index / 30)} />
+                ))}
+              </div>
+            )}
+            {layout === 'list' && (
+              <div className="flex h-full w-full flex-col gap-3 overflow-y-auto px-3 py-4 sm:px-4">
+                {pokemon.map((poke) => (
+                  <PokemonListItem poke={poke} key={poke.id} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
