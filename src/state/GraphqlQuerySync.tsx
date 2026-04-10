@@ -1,7 +1,7 @@
-import type { AllPokemonSpeciesWithSpritesQuery, AllVersionsEnglishNamesQuery } from '@/gql/graphql';
+import type { AllPokemonSpeciesWithSpritesQuery, AllRegionsEnglishNamesQuery, AllVersionsEnglishNamesQuery } from '@/gql/operation-types';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, type ReactNode } from 'react';
-import { app, pokemonSpeciesPayloadSignature, SPECIES_QUERY, VERSIONS_QUERY } from './store';
+import { app, pokemonSpeciesPayloadSignature, REGIONS_QUERY, SPECIES_QUERY, VERSIONS_QUERY } from './store';
 import { graphqlRequest } from './graphqlFetch';
 
 export function GraphqlQuerySync({ children }: { children: ReactNode }) {
@@ -13,6 +13,11 @@ export function GraphqlQuerySync({ children }: { children: ReactNode }) {
   const versionsQuery = useQuery({
     queryKey: ['graphql', 'versionNames'],
     queryFn: () => graphqlRequest<AllVersionsEnglishNamesQuery>(VERSIONS_QUERY),
+  });
+
+  const regionsQuery = useQuery({
+    queryKey: ['graphql', 'regionNames'],
+    queryFn: () => graphqlRequest<AllRegionsEnglishNamesQuery>(REGIONS_QUERY),
   });
 
   const lastSpeciesSig = useRef<string | undefined>(undefined);
@@ -48,6 +53,11 @@ export function GraphqlQuerySync({ children }: { children: ReactNode }) {
     const rows = versionsQuery.data?.pokemon_v2_versionname;
     app.state.query.versionRows.set(rows ?? undefined);
   }, [versionsQuery.data?.pokemon_v2_versionname]);
+
+  useEffect(() => {
+    const rows = regionsQuery.data?.pokemon_v2_region;
+    app.state.query.regionRows.set(rows ?? undefined);
+  }, [regionsQuery.data?.pokemon_v2_region]);
 
   return <>{children}</>;
 }

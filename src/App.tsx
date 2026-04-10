@@ -8,8 +8,8 @@ import { PokemonCard } from './components/PokemonCard';
 import { PokemonListItem } from './components/PokemonListItem';
 
 function App() {
-  const pokemon = useSelector(() => app.pokemonList.get());
-  const boxes = useSelector(() => app.boxes.get());
+  const pokemon = useSelector(() => app.pokemonList.get() ?? []);
+  const boxes = useSelector(() => app.boxes.get() ?? []);
   const layout = useSelector(() => app.state.ui.listLayout.get());
 
   return (
