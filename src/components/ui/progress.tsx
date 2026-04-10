@@ -1,11 +1,16 @@
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
+import type { ClassValue } from "clsx"
 
 import { cn } from "@/lib/utils"
 
+type ProgressProps = React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
+  fillClassName?: ClassValue
+}
+
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
+  ProgressProps
 >(({ className, fillClassName, value, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}

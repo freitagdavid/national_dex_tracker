@@ -1,57 +1,29 @@
-import { Pokemon_V2_Pokemonspecies } from "@/gql/graphql";
-import { Atom, useAtom } from "jotai";
-import { Checkbox } from "./ui/checkbox";
-import { LazyLoadImage } from "react-lazy-load-image-component";
-import { useEffect, useState } from "react";
-import { prominent } from 'color.js'
-import { Pokemon } from "@/state";
+import { Checkbox } from './ui/checkbox';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { app, Pokemon, setPokemonCaught } from '@/state';
+import { useSelector } from '@legendapp/state/react';
 
-export const PokemonListItem = ({ poke }: { poke: Atom<Pokemon>; key: number }) => {
-    poke.debugLabel = 'PokemonListItem'
-    const [pokemon] = useAtom(poke);
-    const [caught, setCaught] = useAtom(pokemon.caught);
-    // const colorPalette = useColor(pokemon.sprites.front_default);
-    const [palette, setPalette] = useState([]);
+export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
+  const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
 
-    // useEffect(() => {
-    //     prominent(pokemon.sprites.front_default).then((palette) => { setPalette(palette) })
-    // }, [pokemon])
+  const handleCaught = () => {
+    setPokemonCaught(poke.id, !caught);
+  };
 
-    const handleCaught = () => {
-        setCaught({ caught: !caught })
-    }
-
-    return (
-        <div className="pl-5 rounded-lg flex shadow-md" >
-            <div className="w-full flex flex-col justify-between py-4">
-                <div className="flex w-full justify-between items-center">
-                    <div className="flex gap-2">
-                        <p className="text-darkTransparent text-xl">{`#${pokemon.id.toString().padStart(3, '0')}`}</p>
-                        <p className="text-darkTransparent text-xl">{pokemon.name.charAt(0).toUpperCase()
-                            + pokemon.name.slice(1)}</p>
-                    </div>
-                    <div className="pr-4 flex justify-center">
-                        <Checkbox className="rounded-[100%] background-darkTransparent" checked={caught} onClick={handleCaught} />
-                    </div>
-                </div>
-                <div className="flex gap-4 items-center w-full">
-                    {pokemon.types.map((type: string) => {
-                        return (
-                            <div className="border-darkTransparent border border-solid rounded-3xl flex justify-center w-32" key={type}>
-                                <p className="text-darkTransparent text-lg text">{type.toUpperCase()}</p>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
-            <div className="flex justify-end pr-2 w-40 bg-lightTransparent rounded-l-[100%]">
-                <LazyLoadImage
-                    src={pokemon.sprites.front_default}
-                    alt={pokemon.name}
-                    width={100}
-                    height={100}
-                />
-            </div>
-        </div>
-    )
+  return (
+    <div className="pl-5 rounded-lg flex shadow-md">
+      <div className="flex flex-col justify-center w-40">
+        <Checkbox checked={caught} onCheckedChange={handleCaught} />
+        <div className="text-lg font-bold">{poke.name}</div>
+      </div>
+      <div className="flex justify-end pr-2 w-40 bg-lightTransparent rounded-l-[100%]">
+        <LazyLoadImage
+          src={poke.sprites.front_default}
+          alt={poke.name}
+          width={100}
+          height={100}
+        />
+      </div>
+    </div>
+  );
 };

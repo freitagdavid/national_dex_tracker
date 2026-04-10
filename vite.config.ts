@@ -1,23 +1,20 @@
 import path from "path";
-import react from "@vitejs/plugin-react";
-import jotaiDebugLabel from "jotai/babel/plugin-debug-label";
-import jotaiReactRefresh from "jotai/babel/plugin-react-refresh";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
     base: "./",
-    plugins: [
-        react({
-            babel: {
-                plugins: [jotaiDebugLabel, jotaiReactRefresh],
-                presets: ["jotai/babel/preset"],
-            },
-        }),
-    ],
+    plugins: [tailwindcss(), react()],
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "./src"),
+        },
+    },
+    server: {
+        watch: {
+            ignored: ["**/node_modules/**", "**/.git/**", "**/.cursor/**"],
         },
     },
 });
