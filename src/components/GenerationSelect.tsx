@@ -1,7 +1,7 @@
 import { app } from '@/state';
 import { useSelector } from '@legendapp/state/react';
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
-import { X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -13,60 +13,55 @@ import {
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { regionHasTypeInScope } from '@/state/pokemonFilters';
-import { getRegionSlugsForVersionId } from '@/state/versionRegionFilter';
 
-type RegionOption = { slug: string; label: string };
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'] as const;
 
-export function RegionSelect() {
+type GenOption = { value: string; label: string; isClear?: boolean };
+
+const GEN_OPTIONS: GenOption[] = ROMAN.slice(1).map((r, i) => ({
+  value: String(i + 1),
+  label: `Generation ${r}`,
+}));
+
+const ALL_ROW: GenOption = { value: '__all__', label: 'All generations', isClear: true };
+
+const STATIC_OPTIONS: GenOption[] = [ALL_ROW, ...GEN_OPTIONS];
+
+function normalizeGenIds(ids: number[]): number[] {
+  return [...new Set(ids)].filter((n) => n >= 1 && n <= 9).sort((a, b) => a - b);
+}
+
+function formatGenSummary(ids: number[]): string {
+  if (ids.length === 0) return 'All generations';
+  const sorted = [...ids].sort((a, b) => a - b);
+  if (sorted.length === 1) {
+    const r = ROMAN[sorted[0]];
+    return r ? `Generation ${r}` : `Generation ${sorted[0]}`;
+  }
+  if (sorted.length <= 4) {
+    return sorted.map((id) => (ROMAN[id] ? `Gen ${ROMAN[id]}` : String(id))).join(', ');
+  }
+  return `${sorted.length} generations`;
+}
+
+export function GenerationSelect() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const regionRows = useSelector(() => app.state.query.regionRows.get());
-  const versionRows = useSelector(() => app.state.query.versionRows.get());
-  const processedPokemon = useSelector(() => app.processedPokemonList.get());
-  const selectedGame = useSelector(() => app.state.ui.selectedGame.get());
-  const selectedTypeFilter = useSelector(() => app.state.ui.selectedTypeFilter.get());
-  const selected = useSelector(() => app.state.ui.selectedRegion.get());
+  const selected = useSelector(() => app.state.ui.selectedGenerations.get());
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlightIndex, setHighlightIndex] = useState(0);
 
-  const options = useMemo((): RegionOption[] => {
-    const national: RegionOption = { slug: 'national', label: 'National' };
-    let rest = (regionRows ?? []).map((r) => ({
-      slug: r.name,
-      label: r.pokemon_v2_regionnames[0]?.name ?? r.name,
-    }));
-    if (selectedGame !== 0) {
-      const allowed = getRegionSlugsForVersionId(versionRows, selectedGame);
-      rest = rest.filter((r) => allowed.has(r.slug));
-    }
-    const typeSlug = selectedTypeFilter !== 'all' ? selectedTypeFilter : null;
-    const processed = processedPokemon;
-    if (typeSlug && processed.length > 0) {
-      rest = rest.filter((r) =>
-        regionHasTypeInScope(processed, selectedGame, r.slug, versionRows, typeSlug),
-      );
-    }
-    return [national, ...rest];
-  }, [regionRows, versionRows, selectedGame, selectedTypeFilter, processedPokemon]);
+  const options = useMemo(() => STATIC_OPTIONS, []);
 
-  const selectedLabel = useMemo(() => {
-    if (selected === 'national') return 'National';
-    const r = (regionRows ?? []).find((x) => x.name === selected);
-    return r?.pokemon_v2_regionnames[0]?.name ?? selected;
-  }, [selected, regionRows]);
+  const selectedLabel = useMemo(() => formatGenSummary(selected), [selected]);
 
   const needle = query.trim().toLowerCase();
   const filtered = useMemo(() => {
     if (!needle) return options;
     return options.filter(
-      (o) => o.label.toLowerCase().includes(needle) || o.slug.toLowerCase().includes(needle),
+      (o) => o.label.toLowerCase().includes(needle) || o.value.includes(needle),
     );
   }, [options, needle]);
-
-  useEffect(() => {
-    setHighlightIndex(0);
-  }, [needle]);
 
   useEffect(() => {
     setHighlightIndex((i) => Math.min(i, Math.max(0, filtered.length - 1)));
@@ -74,17 +69,30 @@ export function RegionSelect() {
 
   const displayValue = open ? query : selectedLabel;
 
-  function selectOption(slug: string) {
-    app.state.ui.selectedRegion.set(slug);
-    setOpen(false);
-    setQuery('');
-    setHighlightIndex(0);
+  function clearAll() {
+    app.state.ui.selectedGenerations.set([]);
   }
 
-  function resetToNational(e: MouseEvent) {
+  function toggleGen(id: number) {
+    const cur = app.state.ui.selectedGenerations.peek();
+    const has = cur.includes(id);
+    const next = has ? cur.filter((x) => x !== id) : [...cur, id];
+    app.state.ui.selectedGenerations.set(normalizeGenIds(next));
+  }
+
+  function applyOption(opt: GenOption) {
+    if (opt.isClear) {
+      clearAll();
+      return;
+    }
+    const id = Number.parseInt(opt.value, 10);
+    if (id >= 1 && id <= 9) toggleGen(id);
+  }
+
+  function resetToAll(e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    selectOption('national');
+    clearAll();
   }
 
   function onInputKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -120,12 +128,18 @@ export function RegionSelect() {
     if (e.key === 'Enter') {
       e.preventDefault();
       const opt = filtered[highlightIndex];
-      if (opt) selectOption(opt.slug);
+      if (opt) applyOption(opt);
     }
   }
 
   const activeId =
-    filtered.length > 0 ? `region-opt-${filtered[highlightIndex]?.slug}` : undefined;
+    filtered.length > 0 ? `gen-opt-${filtered[highlightIndex]?.value}` : undefined;
+
+  function isOptionSelected(opt: GenOption): boolean {
+    if (opt.isClear) return selected.length === 0;
+    const id = Number.parseInt(opt.value, 10);
+    return selected.includes(id);
+  }
 
   return (
     <Popover
@@ -147,9 +161,9 @@ export function RegionSelect() {
             type="text"
             role="combobox"
             aria-expanded={open}
-            aria-controls="region-listbox"
+            aria-controls="generation-listbox"
             aria-activedescendant={activeId}
-            placeholder="Region…"
+            placeholder="Generations…"
             autoComplete="off"
             className={cn(
               'h-9 min-w-0 flex-1 border-0 bg-transparent px-3 py-1 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
@@ -159,6 +173,7 @@ export function RegionSelect() {
               const v = e.target.value;
               if (!open) setOpen(true);
               setQuery(v);
+              setHighlightIndex(0);
             }}
             onFocus={() => {
               setOpen(true);
@@ -169,18 +184,18 @@ export function RegionSelect() {
             onClick={(e) => e.stopPropagation()}
             onKeyDown={onInputKeyDown}
           />
-          {selected !== 'national' && (
+          {selected.length > 0 && (
             <Button
               type="button"
               variant="ghost"
               size="icon"
               tabIndex={-1}
-              aria-label="Reset to National dex"
-              title="Reset to National"
+              aria-label="Reset to all generations"
+              title="All generations"
               className="mr-1 h-7 w-7 shrink-0 text-muted-foreground"
               onPointerDown={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.preventDefault()}
-              onClick={resetToNational}
+              onClick={resetToAll}
             >
               <X className="h-4 w-4" strokeWidth={2} />
             </Button>
@@ -188,9 +203,10 @@ export function RegionSelect() {
         </div>
       </PopoverTrigger>
       <PopoverContent
-        id="region-listbox"
+        id="generation-listbox"
         role="listbox"
-        aria-label="Regions"
+        aria-label="Generations"
+        aria-multiselectable
         className="w-[var(--radix-popover-trigger-width)] min-w-[220px] max-w-[min(100vw-2rem,320px)] p-0"
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
@@ -202,24 +218,34 @@ export function RegionSelect() {
         <Command shouldFilter={false}>
           <CommandList className="max-h-64">
             {filtered.length === 0 ? (
-              <CommandEmpty>No regions match.</CommandEmpty>
+              <CommandEmpty>No generations match.</CommandEmpty>
             ) : (
               <CommandGroup>
                 {filtered.map((opt, i) => (
                   <CommandItem
-                    key={opt.slug}
-                    id={`region-opt-${opt.slug}`}
+                    key={opt.value}
+                    id={`gen-opt-${opt.value}`}
                     role="option"
-                    aria-selected={opt.slug === selected}
-                    value={opt.slug}
+                    aria-selected={isOptionSelected(opt)}
+                    value={opt.value}
                     onMouseDown={(e) => e.preventDefault()}
                     onMouseEnter={() => setHighlightIndex(i)}
-                    onSelect={() => selectOption(opt.slug)}
+                    onSelect={() => applyOption(opt)}
                     className={cn(
+                      'flex items-center gap-2',
                       i === highlightIndex && 'bg-accent text-accent-foreground',
-                      opt.slug === selected && i !== highlightIndex && 'bg-accent/40',
+                      isOptionSelected(opt) && i !== highlightIndex && 'bg-accent/40',
                     )}
                   >
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                      {opt.isClear ? (
+                        selected.length === 0 ? (
+                          <Check className="h-4 w-4" strokeWidth={2} />
+                        ) : null
+                      ) : isOptionSelected(opt) ? (
+                        <Check className="h-4 w-4" strokeWidth={2} />
+                      ) : null}
+                    </span>
                     {opt.label}
                   </CommandItem>
                 ))}

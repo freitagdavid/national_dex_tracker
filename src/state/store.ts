@@ -3,6 +3,12 @@ import type {
   AllRegionsEnglishNamesQuery,
   AllVersionsEnglishNamesQuery,
 } from '@/gql/operation-types';
+import { getOfficialArtworkShinyUrl, getOfficialArtworkUrl } from '@/lib/pokeSpriteUrl';
+import {
+  collectTypeSlugsFromPokemonList,
+  pokemonHasType,
+} from './pokemonFilters';
+import { maxNationalSpeciesIdForSelectedGame } from './nationalDexGameScope';
 import { getVersionGroupIdForVersionId } from './versionRegionFilter';
 import { batch, computed, observable } from '@legendapp/state';
 import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist';
@@ -16,6 +22,7 @@ export const SPECIES_QUERY = `
     pokemon_v2_pokemonspecies(order_by: {id: asc}) {
       name
       id
+      generation_id
       pokemon_v2_pokemondexnumbers {
         pokedex_number
         pokemon_v2_pokedex {
@@ -30,9 +37,9 @@ export const SPECIES_QUERY = `
       }
       pokemon_v2_pokemons {
         pokemon_v2_pokemonsprites {
-          sprites(path: "other.official-artwork")
+          sprites
         }
-        pokemon_v2_pokemontypes {
+        pokemon_v2_pokemontypes(order_by: {slot: asc}) {
           pokemon_v2_type {
             name
             generation_id
@@ -57,6 +64,7 @@ export const VERSIONS_QUERY = `
         id
         version_group_id
         pokemon_v2_versiongroup {
+          generation_id
           pokemon_v2_versiongroupregions {
             pokemon_v2_region {
               name
@@ -80,12 +88,20 @@ export const REGIONS_QUERY = `
   }
 `;
 
+export type FavoriteFilter = 'all' | 'favorites' | 'unfavorites';
+
 /** Persisted UI slice — own observable so persist does not share inline graph with `query`. */
 const ui$ = observable({
   listLayout: 'box' as 'grid' | 'list' | 'box',
   selectedRegion: 'national' as string,
   selectedGame: 0,
+  favoriteFilter: 'all' as FavoriteFilter,
+  /** `'all'` or lowercase type name (e.g. `fire`). */
+  selectedTypeFilter: 'all' as 'all' | string,
+  /** Empty = all generations; otherwise PokeAPI `generation_id` values (1–9), sorted unique. */
+  selectedGenerations: [] as number[],
   caughtById: {} as Record<number, boolean>,
+  favoriteById: {} as Record<number, boolean>,
   caughtNumber: 0,
   boxCaught: {} as Record<number, number>,
 });
@@ -108,6 +124,8 @@ persistObservable(ui$, { local: 'nationalDexTracker' });
 export type Pokemon = {
   name: string;
   id: number;
+  /** Full PokeAPI `sprites` JSON (version-specific + other.*). */
+  spritesJson: unknown;
   sprites: {
     front_default: string;
     front_shiny: string;
@@ -119,6 +137,8 @@ export type Pokemon = {
   dexNumberByRegion: Record<string, number>;
   /** Version group IDs from main-series dex rows (pokedex↔version group). */
   versionGroupIds: number[];
+  /** Introduced in this generation (`pokemon_v2_pokemonspecies.generation_id`). */
+  generationId: number;
 };
 
 function pokemonSpeciesPayloadSig(species: AllPokemonSpeciesWithSpritesQuery['pokemon_v2_pokemonspecies']) {
@@ -134,10 +154,16 @@ let processedCacheList: Pokemon[] | undefined;
 function mapSpeciesRow(
   poke: NonNullable<AllPokemonSpeciesWithSpritesQuery['pokemon_v2_pokemonspecies']>[number],
 ): Pokemon | null {
+  const generationId = poke.generation_id;
+  if (generationId == null) return null;
   const mon = poke.pokemon_v2_pokemons?.[0];
+  if (!mon) return null;
   const spriteRow = mon?.pokemon_v2_pokemonsprites?.[0];
-  const sprites = spriteRow?.sprites;
-  if (!sprites?.front_default) return null;
+  const spritesRoot = spriteRow?.sprites;
+  const officialUrl = getOfficialArtworkUrl(spritesRoot);
+  if (!officialUrl) return null;
+
+  const frontShiny = getOfficialArtworkShinyUrl(spritesRoot) ?? officialUrl;
 
   const dexNumberByRegion: Record<string, number> = {};
   const versionGroupIdSet = new Set<number>();
@@ -148,11 +174,11 @@ function mapSpeciesRow(
       const gid = pvg.version_group_id;
       if (gid != null) versionGroupIdSet.add(gid);
     }
-    const regionName = dex.pokemon_v2_region?.name;
-    if (!regionName) continue;
+    const regionSlug = dex.pokemon_v2_region?.name;
+    if (!regionSlug) continue;
     const n = row.pokedex_number;
-    const prev = dexNumberByRegion[regionName];
-    if (prev === undefined || n < prev) dexNumberByRegion[regionName] = n;
+    const prev = dexNumberByRegion[regionSlug];
+    if (prev === undefined || n < prev) dexNumberByRegion[regionSlug] = n;
   }
   const dexRegions = Object.keys(dexNumberByRegion);
   const versionGroupIds = [...versionGroupIdSet].sort((a, b) => a - b);
@@ -160,29 +186,32 @@ function mapSpeciesRow(
   return {
     name: poke.name,
     id: poke.id,
+    spritesJson: spritesRoot,
     sprites: {
-      front_default: sprites.front_default,
-      front_shiny: sprites.front_shiny ?? sprites.front_default,
+      front_default: officialUrl,
+      front_shiny: frontShiny,
     },
     types: (mon?.pokemon_v2_pokemontypes ?? []).map((item) => item.pokemon_v2_type?.name ?? undefined),
     dexRegions,
     dexNumberByRegion,
     versionGroupIds,
+    generationId,
   };
 }
 
-const pokemonList$ = computed(() => {
+/** Full species list (sprites + dex metadata), before version/region/type/favorite UI filters. */
+const processedPokemonList$ = computed((): Pokemon[] => {
   const data = state$.query.speciesData.get();
   if (!data) {
     processedCacheSig = undefined;
     processedCacheList = undefined;
-    return [] as Pokemon[];
+    return [];
   }
   const species = data.pokemon_v2_pokemonspecies;
   if (species == null || species.length === 0) {
     processedCacheSig = undefined;
     processedCacheList = undefined;
-    return [] as Pokemon[];
+    return [];
   }
   const sig = pokemonSpeciesPayloadSig(species);
   let rows: Pokemon[];
@@ -193,27 +222,82 @@ const pokemonList$ = computed(() => {
     rows = species.map(mapSpeciesRow).filter((p): p is Pokemon => p != null);
     processedCacheList = rows;
   }
+  return rows;
+});
 
+/** After game version + regional dex only (drives type options and cross-filters). */
+const pokemonScoped$ = computed((): Pokemon[] => {
+  const rows = processedPokemonList$.get();
+  if (rows.length === 0) return rows;
   let out = rows;
   const gameId = ui$.selectedGame.get();
   const versionRows = state$.query.versionRows.get();
-  if (gameId !== 0) {
-    const gid = getVersionGroupIdForVersionId(versionRows, gameId);
-    if (gid != null) {
-      out = out.filter((p) => p.versionGroupIds.includes(gid));
+  const selected = ui$.selectedRegion.get();
+
+  // Regional dex: limit to species in that game + region (Hoenn #001 Treecko, etc.).
+  // National dex: full national order; with a game selected, cap by that era’s generation (e.g. RS → #386).
+  if (selected !== 'national') {
+    if (gameId !== 0) {
+      const gid = getVersionGroupIdForVersionId(versionRows, gameId);
+      if (gid != null) {
+        out = out.filter((p) => p.versionGroupIds.includes(gid));
+      }
+    }
+    out = out.filter((p) => p.dexRegions.includes(selected));
+    out = [...out].sort((a, b) => {
+      const na = a.dexNumberByRegion[selected] ?? Number.POSITIVE_INFINITY;
+      const nb = b.dexNumberByRegion[selected] ?? Number.POSITIVE_INFINITY;
+      if (na !== nb) return na - nb;
+      return a.id - b.id;
+    });
+  } else {
+    if (gameId !== 0) {
+      const cap = maxNationalSpeciesIdForSelectedGame(gameId, versionRows);
+      if (cap != null) {
+        out = out.filter((p) => p.id <= cap);
+      }
+    }
+    out = [...out].sort((a, b) => a.id - b.id);
+  }
+  return out;
+});
+
+const pokemonList$ = computed(() => {
+  let out = pokemonScoped$.get();
+
+  const generations = ui$.selectedGenerations.get();
+  if (generations.length > 0) {
+    const set = new Set(generations);
+    out = out.filter((p) => set.has(p.generationId));
+  }
+
+  const typeFilter = ui$.selectedTypeFilter.get();
+  if (typeFilter !== 'all') {
+    out = out.filter((p) => pokemonHasType(p, typeFilter));
+  }
+
+  const favoriteFilter = ui$.favoriteFilter.get();
+  if (favoriteFilter !== 'all') {
+    const favoriteById = ui$.favoriteById.get();
+    if (favoriteFilter === 'favorites') {
+      out = out.filter((p) => favoriteById[p.id]);
+    } else {
+      out = out.filter((p) => !favoriteById[p.id]);
     }
   }
 
-  const selected = ui$.selectedRegion.get();
-  if (selected === 'national') return out;
+  return out;
+});
 
-  const filtered = out.filter((p) => p.dexRegions.includes(selected));
-  return [...filtered].sort((a, b) => {
-    const na = a.dexNumberByRegion[selected] ?? Number.POSITIVE_INFINITY;
-    const nb = b.dexNumberByRegion[selected] ?? Number.POSITIVE_INFINITY;
-    if (na !== nb) return na - nb;
-    return a.id - b.id;
-  });
+/** Type slugs for the current scope including generation filter (for the type picker). */
+const availableTypeSlugs$ = computed(() => {
+  let list = pokemonScoped$.get();
+  const generations = ui$.selectedGenerations.get();
+  if (generations.length > 0) {
+    const set = new Set(generations);
+    list = list.filter((p) => set.has(p.generationId));
+  }
+  return collectTypeSlugsFromPokemonList(list);
 });
 
 /** Caught count for the current species list (derived from `caughtById`, not persisted `caughtNumber`). */
@@ -249,6 +333,9 @@ const boxes$ = computed(() => {
  */
 export const app = {
   state: state$,
+  processedPokemonList: processedPokemonList$,
+  pokemonScoped: pokemonScoped$,
+  availableTypeSlugs: availableTypeSlugs$,
   pokemonList: pokemonList$,
   caughtCount: caughtCount$,
   numPokemon: numPokemon$,
@@ -281,4 +368,11 @@ export function setPokemonCaught(id: number, caught: boolean, boxNum?: number) {
       app.state.ui.boxCaught.assign({ ...byBox, [boxNum]: Math.max(0, Math.min(30, cur + delta)) });
     }
   });
+}
+
+export function setPokemonFavorite(id: number, favorite: boolean) {
+  const byId = app.state.ui.favoriteById.peek();
+  const was = byId[id] ?? false;
+  if (was === favorite) return;
+  app.state.ui.favoriteById.assign({ ...byId, [id]: favorite });
 }

@@ -33,3 +33,18 @@ export function getVersionGroupIdForVersionId(
   const gid = row?.pokemon_v2_version?.version_group_id;
   return gid ?? undefined;
 }
+
+/** PokeAPI `generation_id` for this version’s version group (main-line games). */
+export function getVersionGroupGenerationId(row: VersionNameRow): number | undefined {
+  const id = row.pokemon_v2_version?.pokemon_v2_versiongroup?.generation_id;
+  return id ?? undefined;
+}
+
+export function versionRowMatchesGenerationFilter(
+  row: VersionNameRow,
+  selectedGenerations: readonly number[],
+): boolean {
+  if (selectedGenerations.length === 0) return true;
+  const gid = getVersionGroupGenerationId(row);
+  return gid != null && selectedGenerations.includes(gid);
+}

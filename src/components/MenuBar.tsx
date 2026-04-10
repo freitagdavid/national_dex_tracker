@@ -2,12 +2,15 @@ import { app } from '@/state';
 import { Card, CardContent } from './ui/card';
 import { Menubar, MenubarContent, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarTrigger } from './ui/menubar';
 import { useSelector } from '@legendapp/state/react';
+import { GenerationSelect } from './GenerationSelect';
 import { RegionSelect } from './RegionSelect';
 import { SelectionReconcile } from './SelectionReconcile';
+import { TypeSelect } from './TypeSelect';
 import { VersionSelect } from './VersionSelect';
 
 export const AppBar = () => {
   const layout = useSelector(() => app.state.ui.listLayout.get());
+  const favoriteFilter = useSelector(() => app.state.ui.favoriteFilter.get());
 
   return (
     <Card className="w-full rounded-none border-x-0 border-t border-b-0 shadow-none">
@@ -30,9 +33,33 @@ export const AppBar = () => {
             </MenubarRadioGroup>
           </MenubarContent>
         </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger>Favorites</MenubarTrigger>
+          <MenubarContent>
+            <MenubarRadioGroup value={favoriteFilter}>
+              <MenubarRadioItem onClick={() => app.state.ui.favoriteFilter.set('all')} value="all">
+                All Pokémon
+              </MenubarRadioItem>
+              <MenubarRadioItem
+                onClick={() => app.state.ui.favoriteFilter.set('favorites')}
+                value="favorites"
+              >
+                Favorites only
+              </MenubarRadioItem>
+              <MenubarRadioItem
+                onClick={() => app.state.ui.favoriteFilter.set('unfavorites')}
+                value="unfavorites"
+              >
+                Not favorited
+              </MenubarRadioItem>
+            </MenubarRadioGroup>
+          </MenubarContent>
+        </MenubarMenu>
       </Menubar>
       <VersionSelect />
       <RegionSelect />
+      <TypeSelect />
+      <GenerationSelect />
       </CardContent>
     </Card>
   );

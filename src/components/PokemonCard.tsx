@@ -8,6 +8,7 @@ import { Skeleton } from './ui/skeleton';
 import { useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { useSelector } from '@legendapp/state/react';
+import { usePokemonSpriteUrl } from '@/hooks/usePokemonSpriteUrl';
 
 export const SkeletonCard = () => {
   return (
@@ -29,6 +30,7 @@ export const SkeletonCard = () => {
 
 export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number }) => {
   const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
+  const spriteUrl = usePokemonSpriteUrl(poke);
   const [, setIsLoaded] = useState(false);
 
   const handleLoad = () => {
@@ -52,7 +54,7 @@ export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number })
       <Separator />
       <CardContent className="px-0 pb-0 flex justify-center">
         <LazyLoadImage
-          src={poke.sprites.front_default}
+          src={spriteUrl}
           alt={poke.name}
           className="w-[100px] h-[100px]"
           width={100}

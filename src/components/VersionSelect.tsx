@@ -13,15 +13,22 @@ import {
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { versionNameRowMatchesRegionSlug } from '@/state/versionRegionFilter';
+import { versionHasTypeInScope } from '@/state/pokemonFilters';
+import {
+  versionRowMatchesGenerationFilter,
+  versionNameRowMatchesRegionSlug,
+} from '@/state/versionRegionFilter';
 
 type VersionOption = { versionId: number; label: string; rowKey: number };
 
 export function VersionSelect() {
   const inputRef = useRef<HTMLInputElement>(null);
   const versionRows = useSelector(() => app.state.query.versionRows.get());
+  const processedPokemon = useSelector(() => app.processedPokemonList.get());
   const selectedRegion = useSelector(() => app.state.ui.selectedRegion.get());
   const selectedGame = useSelector(() => app.state.ui.selectedGame.get());
+  const selectedTypeFilter = useSelector(() => app.state.ui.selectedTypeFilter.get());
+  const selectedGenerations = useSelector(() => app.state.ui.selectedGenerations.get());
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlightIndex, setHighlightIndex] = useState(0);
@@ -33,13 +40,23 @@ export function VersionSelect() {
       selectedRegion === 'national'
         ? rows
         : rows.filter((r) => versionNameRowMatchesRegionSlug(r, selectedRegion));
+    const typeSlug = selectedTypeFilter !== 'all' ? selectedTypeFilter : null;
+    const processed = processedPokemon;
     for (const r of filteredRows) {
       const vid = r.version_id;
       if (vid == null) continue;
+      if (!versionRowMatchesGenerationFilter(r, selectedGenerations)) continue;
+      if (
+        typeSlug &&
+        processed.length > 0 &&
+        !versionHasTypeInScope(processed, vid, selectedRegion, versionRows, typeSlug)
+      ) {
+        continue;
+      }
       all.push({ versionId: vid, label: r.name, rowKey: r.id });
     }
     return all;
-  }, [versionRows, selectedRegion]);
+  }, [versionRows, selectedRegion, selectedTypeFilter, selectedGenerations, processedPokemon]);
 
   const selectedLabel = useMemo(() => {
     if (selectedGame === 0) return 'All versions';

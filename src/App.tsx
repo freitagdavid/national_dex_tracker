@@ -48,7 +48,7 @@ function App() {
           </div>
         )}
         {layout === 'list' && (
-          <div className="w-full flex flex-col gap-2 px-4 overflow-scroll h-full pt-4">
+          <div className="flex h-full w-full flex-col gap-3 overflow-y-auto px-3 py-4 sm:px-4">
             {pokemon.map((poke) => (
               <PokemonListItem poke={poke} key={poke.id} />
             ))}
