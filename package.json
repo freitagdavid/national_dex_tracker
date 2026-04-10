@@ -6,7 +6,8 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+        "lint": "oxlint",
+        "lint:fix": "oxlint --fix",
         "preview": "vite preview",
         "codegen": "graphql-codegen"
     },
@@ -52,6 +53,7 @@
         "eslint-plugin-react-refresh": "^0.5.2",
         "globals": "^17.4.0",
         "graphql": "^16.13.2",
+        "oxlint": "^1.59.0",
         "postcss": "^8.5.9",
         "shadcn-ui": "^0.9.5",
         "tailwindcss": "^4.2.2",

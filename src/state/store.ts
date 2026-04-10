@@ -106,8 +106,8 @@ function mapSpeciesRow(
       front_default: sprites.front_default,
       front_shiny: sprites.front_shiny ?? sprites.front_default,
     },
-    types: [...(mon?.pokemon_v2_pokemontypes ?? []).map((item) => item.pokemon_v2_type?.name)],
-    regions: [...poke.pokemon_v2_pokemondexnumbers.map((item) => item.pokemon_v2_pokedex?.name)],
+    types: (mon?.pokemon_v2_pokemontypes ?? []).map((item) => item.pokemon_v2_type?.name),
+    regions: poke.pokemon_v2_pokemondexnumbers.map((item) => item.pokemon_v2_pokedex?.name),
   };
 }
 
