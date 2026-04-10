@@ -8,11 +8,18 @@ import {
   spriteUrlToTransparentBlobUrl,
 } from '@/lib/spriteChromaKey';
 
+export type PokemonSpriteUrlResult = {
+  /** `src` for `<img>` — may be a blob URL after chroma-key processing. */
+  url: string;
+  /** Stable HTTP(S) URL for the same artwork; use to key caches (blob URLs are unique per load). */
+  colorCacheKey: string;
+};
+
 /**
  * Era-appropriate sprite when a game is selected; otherwise official artwork.
  * Gen I–III version sprites get a client-side white→transparent pass so they sit on colored cards.
  */
-export function usePokemonSpriteUrl(poke: Pokemon): string {
+export function usePokemonSpriteUrl(poke: Pokemon): PokemonSpriteUrlResult {
   const selectedGame = useSelector(() => app.state.ui.selectedGame.get());
   const versionRows = useSelector(() => app.state.query.versionRows.get());
 
@@ -55,5 +62,5 @@ export function usePokemonSpriteUrl(poke: Pokemon): string {
     };
   }, [baseUrl]);
 
-  return displayUrl;
+  return { url: displayUrl, colorCacheKey: baseUrl };
 }

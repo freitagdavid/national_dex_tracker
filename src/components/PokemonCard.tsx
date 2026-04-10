@@ -30,7 +30,7 @@ export const SkeletonCard = () => {
 
 export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number }) => {
   const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
-  const spriteUrl = usePokemonSpriteUrl(poke);
+  const { url: spriteUrl } = usePokemonSpriteUrl(poke);
   const [, setIsLoaded] = useState(false);
 
   const handleLoad = () => {

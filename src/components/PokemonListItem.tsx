@@ -40,8 +40,8 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
 
   const primaryType = poke.types.find(Boolean);
   const dexLabel = useListDexDisplayLabel(poke);
-  const spriteUrl = usePokemonSpriteUrl(poke);
-  const { theme, onArtLoad } = usePokemonListImageTheme(spriteUrl, primaryType);
+  const { url: spriteUrl, colorCacheKey } = usePokemonSpriteUrl(poke);
+  const { theme, onArtLoad } = usePokemonListImageTheme(spriteUrl, primaryType, colorCacheKey);
   const typeLabels = poke.types.filter((t): t is string => Boolean(t));
 
   return (
@@ -116,6 +116,7 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
           aria-hidden
         />
         <LazyLoadImage
+          key={`${poke.id}-${colorCacheKey}`}
           src={spriteUrl}
           alt={poke.name}
           width={128}
