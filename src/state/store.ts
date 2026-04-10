@@ -138,7 +138,8 @@ const pokemonList$ = computed(() => {
 const caughtCount$ = computed(() => {
   const list = pokemonList$.get();
   if (list.length === 0) return 0;
-  const byId = ui$.caughtById.peek();
+  // Use .get() so this computed subscribes to `caughtById` updates (.peek() does not track).
+  const byId = ui$.caughtById.get();
   let n = 0;
   for (const p of list) {
     if (byId[p.id]) n++;
