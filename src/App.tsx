@@ -6,6 +6,8 @@ import { Box } from './components/Box';
 import { AppBar } from './components/MenuBar';
 import { PokemonCard } from './components/PokemonCard';
 import { PokemonListItem } from './components/PokemonListItem';
+import { Card, CardHeader, CardTitle } from './components/ui/card';
+import { Separator } from './components/ui/separator';
 
 function App() {
   const pokemon = useSelector(() => app.pokemonList.get() ?? []);
@@ -16,9 +18,14 @@ function App() {
     <>
       <div className="w-screen h-screen">
         <div className="w-full">
-          <div className="bg-accent w-full h-16 flex justify-center items-center shadow-md">
-            <p className="text-primary">National Dex Tracker</p>
-          </div>
+          <Card className="w-full rounded-none border-x-0 border-t-0 shadow-md">
+            <CardHeader className="bg-accent flex flex-col items-center justify-center space-y-0 py-4">
+              <CardTitle className="text-center text-base font-medium text-primary sm:text-lg">
+                National Dex Tracker
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Separator className="rounded-none" />
           <StatefuleProgress
             numPokemon={pokemon.length || 0}
             fillClassName="bg-green-500"

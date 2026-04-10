@@ -1,4 +1,5 @@
 import { app } from '@/state';
+import { Card, CardContent } from './ui/card';
 import { Menubar, MenubarContent, MenubarMenu, MenubarRadioGroup, MenubarRadioItem, MenubarTrigger } from './ui/menubar';
 import { useSelector } from '@legendapp/state/react';
 import { RegionSelect } from './RegionSelect';
@@ -9,7 +10,8 @@ export const AppBar = () => {
   const layout = useSelector(() => app.state.ui.listLayout.get());
 
   return (
-    <div className="flex flex-wrap items-center gap-2 px-2 py-1">
+    <Card className="w-full rounded-none border-x-0 border-t border-b-0 shadow-none">
+      <CardContent className="flex flex-wrap items-center gap-2 px-2 py-1">
       <SelectionReconcile />
       <Menubar className="border-0 bg-transparent p-0 shadow-none">
         <MenubarMenu>
@@ -31,6 +33,7 @@ export const AppBar = () => {
       </Menubar>
       <VersionSelect />
       <RegionSelect />
-    </div>
+      </CardContent>
+    </Card>
   );
 };

@@ -20,7 +20,7 @@ export const StatefuleProgress = ({
     <Progress
       className={cn('w-full h-8', className)}
       value={percentCaught}
-      fillClassName={fillClassName}
+      indicatorClassName={fillClassName}
     />
   );
 };

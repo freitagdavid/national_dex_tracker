@@ -1,5 +1,6 @@
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Separator } from './ui/separator';
 import type { Pokemon } from '@/state';
 import { app, setPokemonCaught } from '@/state';
 import { cn } from '@/lib/utils';
@@ -11,12 +12,14 @@ import { useSelector } from '@legendapp/state/react';
 export const SkeletonCard = () => {
   return (
     <Card className="aspect-square flex flex-col align-middle justify-between w-44 mt-3">
-      <CardHeader className="py-2 border-b-[1px] border-border border-solid">
+      <CardHeader className="py-2">
         <Skeleton className="w-full text-center h-6" />
       </CardHeader>
+      <Separator />
       <CardContent className="px-0 pb-0 flex justify-center">
         <Skeleton className="w-[100px] h-[100px]" />
       </CardContent>
+      <Separator />
       <CardFooter className="w-full flex justify-center pb-0 px-0">
         <Skeleton className="w-full" />
       </CardFooter>
@@ -41,11 +44,12 @@ export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number })
       className="aspect-square flex flex-col align-middle justify-between w-44 mt-3"
       onClick={handleCaught}
     >
-      <CardHeader className="py-2 border-b-[1px] border-border border-solid">
+      <CardHeader className="py-2">
         <CardTitle className="w-full text-center">
           {poke.name.charAt(0).toUpperCase() + poke.name.slice(1)}
         </CardTitle>
       </CardHeader>
+      <Separator />
       <CardContent className="px-0 pb-0 flex justify-center">
         <LazyLoadImage
           src={poke.sprites.front_default}
@@ -57,6 +61,7 @@ export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number })
           placeholder={<Skeleton className="w-[100px] h-[100px]" />}
         />
       </CardContent>
+      <Separator />
       <CardFooter className="w-full flex justify-center pb-0 px-0">
         <Button
           className={cn(

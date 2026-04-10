@@ -2,8 +2,16 @@ import { app } from '@/state';
 import { useSelector } from '@legendapp/state/react';
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { getRegionSlugsForVersionId } from '@/state/versionRegionFilter';
 
@@ -124,7 +132,7 @@ export function RegionSelect() {
             'outline-none focus-within:ring-2 focus-within:ring-ring',
           )}
         >
-          <input
+          <Input
             ref={inputRef}
             type="text"
             role="combobox"
@@ -134,8 +142,7 @@ export function RegionSelect() {
             placeholder="Region…"
             autoComplete="off"
             className={cn(
-              'min-w-0 flex-1 border-0 bg-transparent px-3 py-1 outline-none',
-              'placeholder:text-muted-foreground',
+              'h-9 min-w-0 flex-1 border-0 bg-transparent px-3 py-1 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
             )}
             value={displayValue}
             onChange={(e) => {
@@ -153,18 +160,20 @@ export function RegionSelect() {
             onKeyDown={onInputKeyDown}
           />
           {selected !== 'national' && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               tabIndex={-1}
               aria-label="Reset to National dex"
               title="Reset to National"
-              className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="mr-1 h-7 w-7 shrink-0 text-muted-foreground"
               onPointerDown={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.preventDefault()}
               onClick={resetToNational}
             >
               <X className="h-4 w-4" strokeWidth={2} />
-            </button>
+            </Button>
           )}
         </div>
       </PopoverTrigger>
@@ -172,7 +181,7 @@ export function RegionSelect() {
         id="region-listbox"
         role="listbox"
         aria-label="Regions"
-        className="min-w-[220px] max-w-[min(100vw-2rem,320px)] p-0"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[220px] max-w-[min(100vw-2rem,320px)] p-0"
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
@@ -180,38 +189,34 @@ export function RegionSelect() {
           inputRef.current?.blur();
         }}
       >
-        <ScrollArea className="h-64">
-          <ul className="p-1">
+        <Command shouldFilter={false}>
+          <CommandList className="max-h-64">
             {filtered.length === 0 ? (
-              <li className="px-2 py-2 text-sm text-muted-foreground">No regions match.</li>
+              <CommandEmpty>No regions match.</CommandEmpty>
             ) : (
-              filtered.map((opt, i) => {
-                const highlighted = i === highlightIndex;
-                return (
-                  <li key={opt.slug}>
-                    <button
-                      type="button"
-                      id={`region-opt-${opt.slug}`}
-                      role="option"
-                      aria-selected={opt.slug === selected}
-                      className={cn(
-                        'flex w-full cursor-default select-none rounded-sm px-2 py-1.5 text-left text-sm outline-none',
-                        'hover:bg-accent hover:text-accent-foreground',
-                        highlighted && 'bg-accent text-accent-foreground',
-                        !highlighted && opt.slug === selected && 'bg-accent/40',
-                      )}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onMouseEnter={() => setHighlightIndex(i)}
-                      onClick={() => selectOption(opt.slug)}
-                    >
-                      {opt.label}
-                    </button>
-                  </li>
-                );
-              })
+              <CommandGroup>
+                {filtered.map((opt, i) => (
+                  <CommandItem
+                    key={opt.slug}
+                    id={`region-opt-${opt.slug}`}
+                    role="option"
+                    aria-selected={opt.slug === selected}
+                    value={opt.slug}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onMouseEnter={() => setHighlightIndex(i)}
+                    onSelect={() => selectOption(opt.slug)}
+                    className={cn(
+                      i === highlightIndex && 'bg-accent text-accent-foreground',
+                      opt.slug === selected && i !== highlightIndex && 'bg-accent/40',
+                    )}
+                  >
+                    {opt.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             )}
-          </ul>
-        </ScrollArea>
+          </CommandList>
+        </Command>
       </PopoverContent>
     </Popover>
   );
