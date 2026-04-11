@@ -2,7 +2,8 @@
 'use client';
 import { createAvatar } from '@gluestack-ui/core/avatar/creator';
 import React from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Text, View } from 'react-native';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import { tva, withStyleContext } from '@gluestack-ui/utils/nativewind-utils';
 const SCOPE = 'AVATAR';
@@ -102,8 +103,7 @@ const AvatarImage = React.forwardRef<
       className={avatarImageStyle({
         class: className,
       })}
-      // @ts-expect-error - resizeMode is React Native specific
-      resizeMode="cover"
+      contentFit="cover"
     />
   );
 });

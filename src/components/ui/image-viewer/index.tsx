@@ -1,14 +1,7 @@
 'use client';
 import React, { useCallback, useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Pressable,
-  Text,
-  Image as RNImage,
-  Dimensions,
-  TouchableOpacity,
-  FlatList,
-} from 'react-native';
+import { View, Pressable, Text, Dimensions, TouchableOpacity, FlatList } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -32,7 +25,7 @@ import { Overlay } from '@gluestack-ui/core/overlay/creator';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const AnimatedView = Animated.createAnimatedComponent(View);
-const AnimatedImage = Animated.createAnimatedComponent(RNImage);
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 const imageViewerStyle = tva({
   base: 'w-full',
@@ -343,8 +336,8 @@ const ZoomableImage = React.memo(
       <GestureDetector gesture={composedGesture}>
         <AnimatedImage
           source={{ uri: image.url }}
-          alt={image.alt}
-          resizeMode="contain"
+          accessibilityLabel={image.alt}
+          contentFit="contain"
           style={[
             { width: SCREEN_WIDTH, height: SCREEN_HEIGHT * 0.8 },
             animatedStyle,

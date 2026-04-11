@@ -1,5 +1,6 @@
 'use client';
 import React, { useCallback, useState, useEffect } from 'react';
+import { Image } from 'expo-image';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { Overlay } from '@gluestack-ui/core/overlay/creator';
 
@@ -205,10 +206,12 @@ const ImageViewerContent = React.forwardRef<
         <div className={imageViewerModalStyle({})}>
           <div ref={ref} className={imageViewerContentStyle({})}>
             {currentImage && (
-              <img
-                src={currentImage.url}
-                alt={currentImage.alt || `Image ${currentIndex + 1}`}
-                className="max-w-full max-h-[80vh] object-contain"
+              <Image
+                source={{ uri: currentImage.url }}
+                accessibilityLabel={currentImage.alt || `Image ${currentIndex + 1}`}
+                contentFit="contain"
+                className="max-h-[80vh] max-w-full"
+                style={{ maxWidth: '100%', maxHeight: '80vh' }}
               />
             )}
             {children}

@@ -5,14 +5,8 @@ import React, {
   useState,
   useMemo,
 } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Image,
-  ViewStyle,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ViewStyle } from 'react-native';
+import { Image } from 'expo-image';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import type { UIMessage } from 'ai';
 import Animated from 'react-native-reanimated';
@@ -246,8 +240,8 @@ export const MessageResponse = memo(({ message }: { message: UIMessage }) => {
             <Image
               key={index}
               source={{ uri }}
-              className="w-40 h-40 rounded-xl mt-1.5"
-              resizeMode="cover"
+              className="mt-1.5 h-40 w-40 rounded-xl"
+              contentFit="cover"
             />
           );
         }
