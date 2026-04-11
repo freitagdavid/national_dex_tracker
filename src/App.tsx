@@ -32,8 +32,8 @@ function App() {
   return (
     <>
       <PokemonInfoModal />
-      <div className="w-screen h-screen">
-        <div className="w-full">
+      <div className="flex h-screen w-screen flex-col overflow-hidden">
+        <div className="w-full shrink-0">
           <Card className="w-full rounded-none border-x-0 border-t-0 shadow-md">
             <CardHeader className="bg-accent flex flex-col items-center justify-center space-y-0 py-4">
               <CardTitle className="text-center text-base font-medium text-primary sm:text-lg">
@@ -49,8 +49,9 @@ function App() {
           />
           <AppBar />
         </div>
+        <div className="min-h-0 flex-1 overflow-y-auto">
         {speciesBootstrap.isError && !speciesBootstrap.data ? (
-          <div className="flex h-full w-full items-center justify-center p-6 text-center text-destructive text-sm">
+          <div className="flex min-h-full w-full items-center justify-center p-6 text-center text-destructive text-sm">
             Could not load Pokémon data.
             {speciesBootstrap.error instanceof Error ? ` ${speciesBootstrap.error.message}` : null}
           </div>
@@ -59,21 +60,21 @@ function App() {
         ) : (
           <>
             {layout === 'box' && (
-              <div className="flex h-full w-full flex-wrap justify-around overflow-y-scroll">
+              <div className="flex w-full flex-wrap justify-around px-2 py-2">
                 {boxes.map((box, boxIndex) => (
                   <Box box={box} boxNum={boxIndex} key={boxIndex} />
                 ))}
               </div>
             )}
             {layout === 'grid' && (
-              <div className="flex h-full w-full flex-wrap justify-around overflow-y-scroll">
+              <div className="flex w-full flex-wrap justify-around px-2 py-2">
                 {pokemon.map((poke, index) => (
                   <PokemonCard poke={poke} key={poke.id} boxNum={Math.floor(index / 30)} />
                 ))}
               </div>
             )}
             {layout === 'list' && (
-              <div className="flex h-full w-full flex-col gap-3 overflow-y-auto px-3 py-4 sm:px-4">
+              <div className="flex w-full flex-col gap-3 px-3 py-4 sm:px-4">
                 {pokemon.map((poke) => (
                   <PokemonListItem poke={poke} key={poke.id} />
                 ))}
@@ -81,6 +82,7 @@ function App() {
             )}
           </>
         )}
+        </div>
       </div>
     </>
   );
