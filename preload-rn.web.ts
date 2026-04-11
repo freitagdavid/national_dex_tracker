@@ -1,7 +1,6 @@
 /**
- * Web: ensure react-native-web's FlatList is initialized before Reanimated loads.
- * Reanimated imports `FlatList` from `react-native`; on web the core RN FlatList path breaks.
+ * Web: touch `FlatList` from `react-native` before Reanimated (Metro maps it to RN-web exports).
  */
-import { FlatList } from "react-native-web";
+import { FlatList } from "react-native";
 
 void FlatList;

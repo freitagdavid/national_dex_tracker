@@ -2,6 +2,7 @@
   "expo": {
     "name": "National Dex Tracker",
     "slug": "national-dex-tracker",
+    "scheme": "nationaldextracker",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -30,7 +31,8 @@
     },
     "plugins": [
       "expo-audio",
-      "expo-asset"
+      "expo-asset",
+      "expo-router"
     ]
   }
 }

@@ -7,11 +7,13 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
-    "index.tsx",
+    "index.js",
     "**/*.ts",
     "**/*.tsx",
     "nativewind-env.d.ts",
