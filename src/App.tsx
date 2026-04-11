@@ -14,6 +14,7 @@ import { PokemonInfoModal } from "./components/PokemonInfo/PokemonInfoModal";
 import { StatefuleProgress } from "./components/StatefulProgress";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
+import { PokemonListView } from "./components/ui/PokemonListView";
 
 function App() {
 	const pokemon = useSelector(() => app.pokemonList.get() ?? []);
@@ -32,6 +33,8 @@ function App() {
 		speciesBootstrap.isPending;
 
 	const shellStyle = { flex: 1 as const, minHeight: 0 as const };
+
+	const {data, isError, isPending} = speciesBootstrap;
 
 	const appBody = (
 		<>
@@ -58,27 +61,40 @@ function App() {
 					contentContainerStyle={{ flexGrow: 1 }}
 					keyboardShouldPersistTaps="handled"
 				>
-					{speciesBootstrap.isError && !speciesBootstrap.data ? (
+					{isError && !data && (
 						<Box className="min-h-full w-full items-center justify-center p-6">
-							<Text className="text-center text-sm text-destructive">
-								Could not load Pokémon data.
-								{speciesBootstrap.error instanceof Error
-									? ` ${speciesBootstrap.error.message}`
-									: null}
-							</Text>
-						</Box>
-					) : showMainSkeleton ? (
-						<AppLoadingSkeleton layout={layout} />
-					) : layout === "box" ? (
-						<Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
-							{boxes.map((box, boxIndex) => (
-								<PokemonBox
-									box={box}
-									boxNum={boxIndex}
-									key={boxIndex}
-								/>
-							))}
-						</Box>
+						<Text className="text-center text-sm text-destructive">
+							Could not load Pokémon data.
+							{speciesBootstrap.error instanceof Error
+								? ` ${speciesBootstrap.error.message}`
+								: null}
+						</Text>
+					</Box>
+					)}
+
+					{
+						!isError && !data && (
+							<AppLoadingSkeleton layout={layout} />
+						)
+					}
+					{
+						!isError && data && (
+						// <Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
+						// 	{boxes.map((box, boxIndex) => (
+						// 		<PokemonBox
+						// 			box={box}
+						// 			boxNum={boxIndex}
+						// 			key={boxIndex}
+						// 		/>
+						// 	))}
+						// </Box>
+						<PokemonListView
+							listStyle={layout}
+						/>
+						)
+					}
+					
+					{/* ) : layout === "box" ? (
 					) : layout === "grid" ? (
 						<Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
 							{pokemon.map((poke, index) => (
@@ -95,7 +111,7 @@ function App() {
 								<PokemonListItem poke={poke} key={poke.id} />
 							))}
 						</Box>
-					)}
+					)} */}
 				</ScrollView>
 			</Box>
 		</>

@@ -1,4 +1,4 @@
-import { rgbLuminance, rgbToHex } from "@/lib/pokemonTypeColors";
+import { sampleDominantHexFromRgba } from "@/lib/spriteDominantColorCore";
 
 /**
  * Samples a representative fill color from remote sprite/artwork (HTTPS, CORS-enabled).
@@ -31,28 +31,7 @@ export async function sampleDominantCardColor(imageUrl: string): Promise<string 
 				}
 				ctx.drawImage(img, 0, 0, sampleSize, sampleSize);
 				const { data } = ctx.getImageData(0, 0, sampleSize, sampleSize);
-				let rSum = 0;
-				let gSum = 0;
-				let bSum = 0;
-				let n = 0;
-				for (let i = 0; i < data.length; i += 4) {
-					const a = data[i + 3]!;
-					if (a < 28) continue;
-					const r = data[i]!;
-					const g = data[i + 1]!;
-					const b = data[i + 2]!;
-					const L = rgbLuminance(r, g, b);
-					if (L > 0.93 || L < 0.04) continue;
-					rSum += r;
-					gSum += g;
-					bSum += b;
-					n++;
-				}
-				if (n < 8) {
-					resolve(null);
-					return;
-				}
-				resolve(rgbToHex(rSum / n, gSum / n, bSum / n));
+				resolve(sampleDominantHexFromRgba(data, sampleSize, sampleSize));
 			} catch {
 				resolve(null);
 			}

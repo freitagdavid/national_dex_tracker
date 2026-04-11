@@ -18,91 +18,12 @@ import {
 } from "./pokemonFilters";
 import { getVersionGroupIdForVersionId } from "./versionRegionFilter";
 
-export const SPECIES_QUERY = `
-  query allPokemonSpeciesWithSprites {
-    pokemon_v2_pokemonspecies(order_by: {id: asc}) {
-      name
-      id
-      generation_id
-      pokemon_v2_pokemondexnumbers {
-        pokedex_number
-        pokemon_v2_pokedex {
-          is_main_series
-          pokemon_v2_region {
-            name
-          }
-          pokemon_v2_pokedexversiongroups {
-            version_group_id
-          }
-        }
-      }
-      pokemon_v2_pokemons(order_by: [{is_default: desc}, {id: asc}]) {
-        id
-        name
-        is_default
-        pokemon_v2_pokemonsprites {
-          sprites
-        }
-        pokemon_v2_pokemontypes(order_by: {slot: asc}) {
-          pokemon_v2_type {
-            name
-            generation_id
-          }
-        }
-      }
-      has_gender_differences
-      capture_rate
-      base_happiness
-    }
-  }
-`;
-
-export const CATCHABLE_NON_DEFAULT_POKEMON_QUERY = `
-  query CatchableNonDefaultPokemonIds {
-    pokemon_v2_pokemon(
-      where: {
-        _and: [{ is_default: { _eq: false } }, { pokemon_v2_encounters: {} }]
-      }
-    ) {
-      id
-    }
-  }
-`;
-
-export const VERSIONS_QUERY = `
-  query allVersionsEnglishNames {
-    pokemon_v2_versionname(where: {language_id: {_eq: 9}}) {
-      name
-      id
-      language_id
-      version_id
-      pokemon_v2_version {
-        id
-        version_group_id
-        pokemon_v2_versiongroup {
-          generation_id
-          pokemon_v2_versiongroupregions {
-            pokemon_v2_region {
-              name
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const REGIONS_QUERY = `
-  query allRegionsEnglishNames {
-    pokemon_v2_region(order_by: {id: asc}) {
-      id
-      name
-      pokemon_v2_regionnames(where: {language_id: {_eq: 9}}) {
-        name
-      }
-    }
-  }
-`;
+export {
+	CATCHABLE_NON_DEFAULT_POKEMON_QUERY,
+	REGIONS_QUERY,
+	SPECIES_QUERY,
+	VERSIONS_QUERY,
+} from "@/graphql/pokeapiQueries";
 
 export type FavoriteFilter = "all" | "favorites" | "unfavorites";
 
