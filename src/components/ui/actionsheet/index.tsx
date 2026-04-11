@@ -1,28 +1,37 @@
 'use client';
+import React from 'react';
 import { H4 } from '@expo/html-elements';
 import { createActionsheet } from '@gluestack-ui/core/actionsheet/creator';
-import { UIIcon } from '@gluestack-ui/core/icon/creator';
-import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import {
+  Pressable,
+  View,
+  Text,
+  ScrollView,
+  VirtualizedList,
+  FlatList,
+  SectionList,
+  PressableProps,
+  ViewStyle,
+} from 'react-native';
+import { UIIcon as _UIIcon } from '@gluestack-ui/core/icon/creator';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
+import { withUniwind } from 'uniwind';
+import {
+  Motion,
   AnimatePresence,
   createMotionAnimatedComponent,
-  Motion,
   MotionComponentProps,
 } from '@legendapp/motion';
-import { styled } from 'nativewind';
-import React from 'react';
-import {
-  FlatList,
-  Pressable,
-  PressableProps,
-  ScrollView,
-  SectionList,
-  Text,
-  View,
-  ViewStyle,
-  VirtualizedList,
-} from 'react-native';
+
+const UIIcon = withUniwind(_UIIcon);
+const WrappedText = withUniwind(Text);
+const WrappedView = withUniwind(View);
+const WrappedScrollView = withUniwind(ScrollView);
+const WrappedVirtualizedList = withUniwind(VirtualizedList);
+const WrappedFlatList = withUniwind(FlatList);
+const WrappedSectionList = withUniwind(SectionList);
+const WrappedH4 = withUniwind(H4);
 
 const ItemWrapper = React.forwardRef<
   React.ComponentRef<typeof Pressable>,
@@ -43,24 +52,30 @@ const AnimatedPressable = createMotionAnimatedComponent(
   Pressable
 ) as React.ComponentType<IAnimatedPressableProps>;
 
-const StyledUIIcon = styled(UIIcon, { className: "style" });
-
-export const UIActionsheet = createActionsheet({
+const _UIActionsheet = createActionsheet({
   Root: View,
   Content: MotionView,
   Item: ItemWrapper,
-  ItemText: Text,
-  DragIndicator: View,
+  ItemText: WrappedText,
+  DragIndicator: WrappedView,
   IndicatorWrapper: View,
   Backdrop: AnimatedPressable,
-  ScrollView: ScrollView,
-  VirtualizedList: VirtualizedList,
-  FlatList: FlatList,
-  SectionList: SectionList,
-  SectionHeaderText: H4,
-  Icon: StyledUIIcon,
+  ScrollView: WrappedScrollView,
+  VirtualizedList: WrappedVirtualizedList,
+  FlatList: WrappedFlatList,
+  SectionList: WrappedSectionList,
+  SectionHeaderText: WrappedH4,
+  Icon: UIIcon,
   AnimatePresence: AnimatePresence,
 });
+
+export const UIActionsheet = Object.assign(
+  withUniwind(_UIActionsheet),
+  {
+    DragIndicatorWrapper: withUniwind(_UIActionsheet.DragIndicatorWrapper),
+  }
+) as typeof _UIActionsheet;
+
 
 const actionsheetStyle = tva({ base: 'w-full h-full web:pointer-events-none' });
 
@@ -99,7 +114,7 @@ const actionsheetDragIndicatorWrapperStyle = tva({
 });
 
 const actionsheetBackdropStyle = tva({
-  base: 'absolute left-0 top-0 right-0 bottom-0 bg-[#000]/50 web:cursor-default web:pointer-events-auto',
+  base: 'absolute left-0 top-0 right-0 bottom-0 bg-black/50 web:cursor-default web:pointer-events-auto',
 });
 
 const actionsheetScrollViewStyle = tva({
@@ -454,7 +469,17 @@ const ActionsheetIcon = React.forwardRef<
 });
 
 export {
-  Actionsheet, ActionsheetBackdrop, ActionsheetContent, ActionsheetDragIndicator,
-  ActionsheetDragIndicatorWrapper, ActionsheetFlatList, ActionsheetIcon, ActionsheetItem,
-  ActionsheetItemText, ActionsheetScrollView, ActionsheetSectionHeaderText, ActionsheetSectionList, ActionsheetVirtualizedList
+  Actionsheet,
+  ActionsheetContent,
+  ActionsheetItem,
+  ActionsheetItemText,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetBackdrop,
+  ActionsheetScrollView,
+  ActionsheetVirtualizedList,
+  ActionsheetFlatList,
+  ActionsheetSectionList,
+  ActionsheetSectionHeaderText,
+  ActionsheetIcon,
 };

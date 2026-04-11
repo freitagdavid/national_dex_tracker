@@ -1,4 +1,4 @@
-import { PlaceholderScreen } from "@/components/navigation/PlaceholderScreen";
+import { PlaceholderScreen } from "../src/components/navigation";
 
 export default function LocationsScreen() {
 	return (

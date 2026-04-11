@@ -1,12 +1,5 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": [
-    "dist/**",
-    ".expo/**",
-    "src/components/ui/chat-ai/**",
-    "src/components/ui/bottomsheet/**",
-    "src/components/ui/tabs/**"
-  ],
   "plugins": [
     "typescript",
     "unicorn",
