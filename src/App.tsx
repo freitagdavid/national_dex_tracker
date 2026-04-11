@@ -13,7 +13,6 @@ import { PokemonListItem } from "./components/PokemonListItem";
 import { PokemonInfoModal } from "./components/PokemonInfo/PokemonInfoModal";
 import { StatefuleProgress } from "./components/StatefulProgress";
 import { Box } from "@/components/ui/box";
-import { Card } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 
 function App() {
@@ -46,14 +45,6 @@ function App() {
 				}
 			>
 				<Box className="w-full shrink-0">
-					<Card className="w-full rounded-none border-x-0 border-t-0 border-border bg-card shadow-md">
-						<Box className="flex flex-col items-center justify-center bg-accent py-4">
-							<Text className="text-center text-base font-medium text-primary sm:text-lg">
-								National Dex Tracker
-							</Text>
-						</Box>
-					</Card>
-					<Box className="h-px w-full bg-border" />
 					<StatefuleProgress
 						numPokemon={pokemon.length || 0}
 						fillClassName="bg-green-500"
