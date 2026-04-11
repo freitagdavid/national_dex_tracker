@@ -9,10 +9,6 @@ import { usePokemonSpriteUrl } from '@/hooks/usePokemonSpriteUrl';
 import { Card } from './ui/card';
 import { Skeleton } from './ui/skeleton';
 
-function displaySpeciesName(name: string): string {
-  return name.charAt(0).toUpperCase() + name.slice(1);
-}
-
 /** Dark disc with the checkmark cut out so the card background shows through (“invisible” mark). */
 function CaughtCutoutDisc({ fill, maskId }: { fill: string; maskId: string }) {
   return (
@@ -38,7 +34,7 @@ function CaughtCutoutDisc({ fill, maskId }: { fill: string; maskId: string }) {
 
 export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
   const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
-  const favorite = useSelector(() => app.state.ui.favoriteById[poke.id].get() ?? false);
+  const favorite = useSelector(() => app.state.ui.favoriteById[poke.speciesId].get() ?? false);
 
   const primaryType = poke.types.find(Boolean);
   const dexLabel = useListDexDisplayLabel(poke);
@@ -54,11 +50,11 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
         'relative flex min-h-26 cursor-pointer overflow-hidden rounded-[1.35rem] border-0 py-0 pr-0 pl-4 shadow-md',
       )}
       style={{ backgroundColor: theme.cardBg, color: theme.text }}
-      onClick={() => openPokemonInfo(poke.id)}
+      onClick={() => openPokemonInfo(poke.speciesId, poke.id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          openPokemonInfo(poke.id);
+          openPokemonInfo(poke.speciesId, poke.id);
         }
       }}
     >
@@ -69,7 +65,7 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
               {dexLabel}
             </span>
             <h2 className="min-w-0 flex-1 text-lg font-bold leading-none tracking-tight">
-              {displaySpeciesName(poke.name)}
+              {poke.displayName}
             </h2>
           </div>
           <div className="flex shrink-0 items-center gap-0.5 pr-1">
@@ -81,7 +77,7 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
               style={{ color: theme.text }}
               onClick={(e) => {
                 e.stopPropagation();
-                setPokemonFavorite(poke.id, !favorite);
+                setPokemonFavorite(poke.speciesId, !favorite);
               }}
             >
               <Star
@@ -135,7 +131,7 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
         <LazyLoadImage
           key={`${poke.id}-${colorCacheKey}`}
           src={spriteUrl}
-          alt={poke.name}
+          alt={poke.displayName}
           width={128}
           height={128}
           crossOrigin="anonymous"

@@ -64,20 +64,31 @@ function displaySpeciesName(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-function pickPokemonFromList(list: Pokemon[], speciesId: number | null): Pokemon | undefined {
+function pickPokemonFromList(
+  list: Pokemon[],
+  speciesId: number | null,
+  listRowPokemonId: number | null,
+): Pokemon | undefined {
   if (speciesId == null) return undefined;
-  return list.find((p) => p.id === speciesId);
+  if (listRowPokemonId != null) {
+    const hit = list.find((p) => p.id === listRowPokemonId && p.speciesId === speciesId);
+    if (hit) return hit;
+  }
+  return (
+    list.find((p) => p.speciesId === speciesId && p.id === speciesId) ?? list.find((p) => p.speciesId === speciesId)
+  );
 }
 
 export function PokemonInfoModal() {
   const open = useSelector(() => app.state.infoModal.open.get());
   const speciesId = useSelector(() => app.state.infoModal.speciesId.get());
+  const listContextPokemonId = useSelector(() => app.state.infoModal.listContextPokemonId.get());
   const selectedVersionId = useSelector(() => app.state.infoModal.selectedVersionId.get());
   const processedList = useSelector(() => app.processedPokemonList.get() ?? []);
 
   const listPoke = useMemo(
-    () => pickPokemonFromList(processedList, speciesId),
-    [processedList, speciesId],
+    () => pickPokemonFromList(processedList, speciesId, listContextPokemonId),
+    [processedList, speciesId, listContextPokemonId],
   );
 
   const detailQuery = useQuery({
@@ -115,8 +126,10 @@ export function PokemonInfoModal() {
     if (!official) return undefined;
     const genId = speciesRow.pokemon_v2_generation?.id ?? 1;
     return {
-      name: speciesRow.name,
+      speciesId: speciesRow.id,
       id: speciesRow.id,
+      name: speciesRow.name,
+      displayName: displaySpeciesName(speciesRow.name),
       spritesJson: spritesRoot,
       sprites: {
         front_default: official,

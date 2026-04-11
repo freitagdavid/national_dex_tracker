@@ -49,25 +49,25 @@ export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number })
     >
       <button
         type="button"
-        aria-label={`${poke.name} details`}
+        aria-label={`${poke.displayName} details`}
         className="absolute top-1 right-1 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-border/80 bg-background/95 text-foreground shadow-sm transition-opacity hover:opacity-90"
         onClick={(e) => {
           e.stopPropagation();
-          openPokemonInfo(poke.id);
+          openPokemonInfo(poke.speciesId, poke.id);
         }}
       >
         <Info className="h-4 w-4" strokeWidth={2.5} aria-hidden />
       </button>
       <CardHeader className="py-2">
         <CardTitle className="w-full text-center">
-          {poke.name.charAt(0).toUpperCase() + poke.name.slice(1)}
+          {poke.displayName}
         </CardTitle>
       </CardHeader>
       <Separator />
       <CardContent className="px-0 pb-0 flex justify-center">
         <LazyLoadImage
           src={spriteUrl}
-          alt={poke.name}
+          alt={poke.displayName}
           className="w-[100px] h-[100px]"
           width={100}
           height={100}

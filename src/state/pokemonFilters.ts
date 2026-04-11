@@ -5,6 +5,7 @@ import { getVersionGroupIdForVersionId } from './versionRegionFilter';
 /** Row shape used by dex filters (matches `Pokemon` from the store). */
 export type PokeRow = {
   id: number;
+  speciesId: number;
   types: (string | undefined)[];
   dexRegions: string[];
   dexNumberByRegion: Record<string, number>;
@@ -32,16 +33,19 @@ export function listAfterVersionAndRegion(
   gameId: number,
   region: string,
   versionRows: VersionNameRow[] | undefined,
-): Pokemon[] {
+): PokeRow[] {
   let out = rows;
   if (region === 'national') {
     if (gameId !== 0) {
       const cap = maxNationalSpeciesIdForSelectedGame(gameId, versionRows);
       if (cap != null) {
-        out = out.filter((p) => p.id <= cap);
+        out = out.filter((p) => p.speciesId <= cap);
       }
     }
-    return [...out].sort((a, b) => a.id - b.id);
+    return [...out].sort((a, b) => {
+      if (a.speciesId !== b.speciesId) return a.speciesId - b.speciesId;
+      return a.id - b.id;
+    });
   }
 
   if (gameId !== 0) {
@@ -55,12 +59,13 @@ export function listAfterVersionAndRegion(
     const na = a.dexNumberByRegion[region] ?? Number.POSITIVE_INFINITY;
     const nb = b.dexNumberByRegion[region] ?? Number.POSITIVE_INFINITY;
     if (na !== nb) return na - nb;
+    if (a.speciesId !== b.speciesId) return a.speciesId - b.speciesId;
     return a.id - b.id;
   });
 }
 
 export function versionHasTypeInScope(
-  allRows: Pokemon[],
+  allRows: PokeRow[],
   versionId: number,
   region: string,
   versionRows: VersionNameRow[] | undefined,

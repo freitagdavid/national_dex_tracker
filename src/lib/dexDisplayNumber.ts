@@ -10,7 +10,7 @@ export function getListDexDisplayNumber(poke: Pokemon, selectedRegion: string): 
     const r = poke.dexNumberByRegion[selectedRegion];
     if (r != null) return r;
   }
-  return poke.id;
+  return poke.speciesId;
 }
 
 export function formatDexListLabel(n: number): string {

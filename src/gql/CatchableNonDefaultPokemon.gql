@@ -1,0 +1,9 @@
+query CatchableNonDefaultPokemonIds {
+  pokemon_v2_pokemon(
+    where: {
+      _and: [{ is_default: { _eq: false } }, { pokemon_v2_encounters: {} }]
+    }
+  ) {
+    id
+  }
+}

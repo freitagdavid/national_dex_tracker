@@ -28,6 +28,9 @@ export type AllRegionsEnglishNamesQuery = {
 };
 
 export type SpeciesQueryPokemon = {
+  id: number;
+  name: string;
+  is_default?: boolean | null;
   pokemon_v2_pokemonsprites?: Array<{ sprites?: unknown } | null> | null;
   pokemon_v2_pokemontypes?: Array<{ pokemon_v2_type?: { name?: string | null; generation_id?: number | null } | null }> | null;
 };
@@ -54,6 +57,10 @@ export type SpeciesQueryRow = {
 
 export type AllPokemonSpeciesWithSpritesQuery = {
   pokemon_v2_pokemonspecies: SpeciesQueryRow[] | null;
+};
+
+export type CatchableNonDefaultPokemonIdsQuery = {
+  pokemon_v2_pokemon: Array<{ id: number }> | null;
 };
 
 export type PokemonSpeciesDetailQuery = {
