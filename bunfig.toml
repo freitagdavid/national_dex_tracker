@@ -1,0 +1,4 @@
+# Bun lockfile uses configVersion 1 + workspaces; the default linker can be "isolated"
+# (pnpm-style). Metro, Expo, and many RN tools assume npm-style hoisted node_modules.
+[install]
+linker = "hoisted"

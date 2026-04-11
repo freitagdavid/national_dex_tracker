@@ -1,26 +1,25 @@
-import { app } from '@/state';
-import { Progress } from './ui/progress';
-import { useSelector } from '@legendapp/state/react';
-import { cn } from '@/lib/utils';
-import { ClassValue } from 'clsx';
+import { useSelector } from "@legendapp/state/react";
+import { app } from "@/state";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 
 export const StatefuleProgress = ({
-  numPokemon,
-  className,
-  fillClassName,
+	numPokemon,
+	className,
+	fillClassName,
 }: {
-  numPokemon: number;
-  className?: string;
-  fillClassName: ClassValue;
+	numPokemon: number;
+	className?: string;
+	/** Filled portion */
+	fillClassName?: string;
 }) => {
-  const caught = useSelector(() => app.caughtCount.get());
-  const percentCaught = numPokemon > 0 ? (caught / numPokemon) * 100 : 0;
+	const caught = useSelector(() => app.caughtCount.get());
+	const percentCaught = numPokemon > 0 ? (caught / numPokemon) * 100 : 0;
 
-  return (
-    <Progress
-      className={cn('w-full h-8', className)}
-      value={percentCaught}
-      indicatorClassName={fillClassName}
-    />
-  );
+	return (
+		<Progress value={percentCaught} className={className ?? "h-8 w-full"}>
+			<ProgressFilledTrack
+				className={fillClassName ?? "bg-green-500"}
+			/>
+		</Progress>
+	);
 };

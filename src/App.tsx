@@ -1,91 +1,132 @@
-import { useSelector } from '@legendapp/state/react';
-import { useQuery } from '@tanstack/react-query';
-import './App.css';
-import { app, SPECIES_QUERY } from '@/state';
-import { graphqlRequest } from '@/state/graphqlFetch';
-import type { AllPokemonSpeciesWithSpritesQuery } from '@/gql/operation-types';
-import { StatefuleProgress } from './components/StatefulProgress';
-import { Box } from './components/Box';
-import { AppBar } from './components/MenuBar';
-import { PokemonCard } from './components/PokemonCard';
-import { PokemonListItem } from './components/PokemonListItem';
-import { PokemonInfoModal } from './components/PokemonInfo/PokemonInfoModal';
-import { AppLoadingSkeleton } from './components/AppLoadingSkeleton';
-import { Card, CardHeader, CardTitle } from './components/ui/card';
-import { Separator } from './components/ui/separator';
+import { useSelector } from "@legendapp/state/react";
+import { useQuery } from "@tanstack/react-query";
+import { Platform, ScrollView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { AllPokemonSpeciesWithSpritesQuery } from "@/gql/operation-types";
+import { graphqlRequest } from "@/state/graphqlFetch";
+import { app, SPECIES_QUERY } from "@/state";
+import { AppBar } from "./components/MenuBar";
+import { AppLoadingSkeleton } from "./components/AppLoadingSkeleton";
+import { Box as PokemonBox } from "./components/Box";
+import { PokemonCard } from "./components/PokemonCard";
+import { PokemonListItem } from "./components/PokemonListItem";
+import { PokemonInfoModal } from "./components/PokemonInfo/PokemonInfoModal";
+import { StatefuleProgress } from "./components/StatefulProgress";
+import { Box } from "@/components/ui/box";
+import { Card } from "@/components/ui/card";
+import { Text } from "@/components/ui/text";
 
 function App() {
-  const pokemon = useSelector(() => app.pokemonList.get() ?? []);
-  const boxes = useSelector(() => app.boxes.get() ?? []);
-  const layout = useSelector(() => app.state.ui.listLayout.get());
+	const pokemon = useSelector(() => app.pokemonList.get() ?? []);
+	const boxes = useSelector(() => app.boxes.get() ?? []);
+	const layout = useSelector(() => app.state.ui.listLayout.get());
 
-  const speciesBootstrap = useQuery({
-    queryKey: ['graphql', 'pokemonSpecies'],
-    queryFn: () => graphqlRequest<AllPokemonSpeciesWithSpritesQuery>(SPECIES_QUERY),
-  });
+	const speciesBootstrap = useQuery({
+		queryKey: ["graphql", "pokemonSpecies"],
+		queryFn: () =>
+			graphqlRequest<AllPokemonSpeciesWithSpritesQuery>(SPECIES_QUERY),
+	});
 
-  const showMainSkeleton =
-    !speciesBootstrap.isError &&
-    !speciesBootstrap.data &&
-    (speciesBootstrap.isPending || speciesBootstrap.isFetching);
+	const showMainSkeleton =
+		!speciesBootstrap.isError &&
+		!speciesBootstrap.data &&
+		speciesBootstrap.isPending;
 
-  return (
-    <>
-      <PokemonInfoModal />
-      <div className="flex h-screen w-screen flex-col overflow-hidden">
-        <div className="w-full shrink-0">
-          <Card className="w-full rounded-none border-x-0 border-t-0 shadow-md">
-            <CardHeader className="bg-accent flex flex-col items-center justify-center space-y-0 py-4">
-              <CardTitle className="text-center text-base font-medium text-primary sm:text-lg">
-                National Dex Tracker
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Separator className="rounded-none" />
-          <StatefuleProgress
-            numPokemon={pokemon.length || 0}
-            fillClassName="bg-green-500"
-            className="rounded-none bg-red-500"
-          />
-          <AppBar />
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-        {speciesBootstrap.isError && !speciesBootstrap.data ? (
-          <div className="flex min-h-full w-full items-center justify-center p-6 text-center text-destructive text-sm">
-            Could not load Pokémon data.
-            {speciesBootstrap.error instanceof Error ? ` ${speciesBootstrap.error.message}` : null}
-          </div>
-        ) : showMainSkeleton ? (
-          <AppLoadingSkeleton layout={layout} />
-        ) : (
-          <>
-            {layout === 'box' && (
-              <div className="flex w-full flex-wrap justify-around px-2 py-2">
-                {boxes.map((box, boxIndex) => (
-                  <Box box={box} boxNum={boxIndex} key={boxIndex} />
-                ))}
-              </div>
-            )}
-            {layout === 'grid' && (
-              <div className="flex w-full flex-wrap justify-around px-2 py-2">
-                {pokemon.map((poke, index) => (
-                  <PokemonCard poke={poke} key={poke.id} boxNum={Math.floor(index / 30)} />
-                ))}
-              </div>
-            )}
-            {layout === 'list' && (
-              <div className="flex w-full flex-col gap-3 px-3 py-4 sm:px-4">
-                {pokemon.map((poke) => (
-                  <PokemonListItem poke={poke} key={poke.id} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-        </div>
-      </div>
-    </>
-  );
+	const shellStyle = { flex: 1 as const, minHeight: 0 as const };
+
+	const appBody = (
+		<>
+			<PokemonInfoModal />
+			<Box
+				className="h-full w-full flex-1 flex-col overflow-hidden"
+				style={
+					Platform.OS === "web"
+						? { flex: 1, minHeight: 0, height: "100%" as const }
+						: shellStyle
+				}
+			>
+				<Box className="w-full shrink-0">
+					<Card className="w-full rounded-none border-x-0 border-t-0 border-border bg-card shadow-md">
+						<Box className="flex flex-col items-center justify-center bg-accent py-4">
+							<Text className="text-center text-base font-medium text-primary sm:text-lg">
+								National Dex Tracker
+							</Text>
+						</Box>
+					</Card>
+					<Box className="h-px w-full bg-border" />
+					<StatefuleProgress
+						numPokemon={pokemon.length || 0}
+						fillClassName="bg-green-500"
+						className="h-8 w-full rounded-none bg-red-500"
+					/>
+					<AppBar />
+				</Box>
+				<ScrollView
+					className="min-h-0 flex-1"
+					style={shellStyle}
+					contentContainerStyle={{ flexGrow: 1 }}
+					keyboardShouldPersistTaps="handled"
+				>
+					{speciesBootstrap.isError && !speciesBootstrap.data ? (
+						<Box className="min-h-full w-full items-center justify-center p-6">
+							<Text className="text-center text-sm text-destructive">
+								Could not load Pokémon data.
+								{speciesBootstrap.error instanceof Error
+									? ` ${speciesBootstrap.error.message}`
+									: null}
+							</Text>
+						</Box>
+					) : showMainSkeleton ? (
+						<AppLoadingSkeleton layout={layout} />
+					) : layout === "box" ? (
+						<Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
+							{boxes.map((box, boxIndex) => (
+								<PokemonBox
+									box={box}
+									boxNum={boxIndex}
+									key={boxIndex}
+								/>
+							))}
+						</Box>
+					) : layout === "grid" ? (
+						<Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
+							{pokemon.map((poke, index) => (
+								<PokemonCard
+									poke={poke}
+									key={poke.id}
+									boxNum={Math.floor(index / 30)}
+								/>
+							))}
+						</Box>
+					) : (
+						<Box className="w-full flex-col gap-3 px-3 py-4">
+							{pokemon.map((poke) => (
+								<PokemonListItem poke={poke} key={poke.id} />
+							))}
+						</Box>
+					)}
+				</ScrollView>
+			</Box>
+		</>
+	);
+
+	if (Platform.OS === "web") {
+		return (
+			<View className="flex-1 bg-background" style={{ flex: 1, height: "100%" }}>
+				{appBody}
+			</View>
+		);
+	}
+
+	return (
+		<SafeAreaView
+			className="flex-1 bg-background"
+			edges={["top", "left", "right"]}
+			style={{ flex: 1 }}
+		>
+			{appBody}
+		</SafeAreaView>
+	);
 }
 
 export default App;

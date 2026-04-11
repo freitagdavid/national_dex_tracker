@@ -1,9 +1,6 @@
+import "./persist-setup";
 import { batch, computed, observable } from "@legendapp/state";
-import {
-	configureObservablePersistence,
-	persistObservable,
-} from "@legendapp/state/persist";
-import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
+import { persistObservable } from "@legendapp/state/persist";
 import type {
 	AllPokemonSpeciesWithSpritesQuery,
 	AllRegionsEnglishNamesQuery,
@@ -20,10 +17,6 @@ import {
 	pokemonHasType,
 } from "./pokemonFilters";
 import { getVersionGroupIdForVersionId } from "./versionRegionFilter";
-
-configureObservablePersistence({
-	pluginLocal: ObservablePersistLocalStorage,
-});
 
 export const SPECIES_QUERY = `
   query allPokemonSpeciesWithSprites {

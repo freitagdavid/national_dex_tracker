@@ -1,91 +1,76 @@
-import { Button } from './ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Separator } from './ui/separator';
-import type { Pokemon } from '@/state';
-import { app, openPokemonInfo, setPokemonCaught } from '@/state';
-import { Info } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Skeleton } from './ui/skeleton';
-import { useState } from 'react';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { useSelector } from '@legendapp/state/react';
-import { usePokemonSpriteUrl } from '@/hooks/usePokemonSpriteUrl';
+import { useSelector } from "@legendapp/state/react";
+import { Image } from "expo-image";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Pressable } from "react-native";
+import type { Pokemon } from "@/state";
+import { app, openPokemonInfo, setPokemonCaught } from "@/state";
+import { usePokemonSpriteUrl } from "@/hooks/usePokemonSpriteUrl";
+import { Box } from "@/components/ui/box";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 
 export const SkeletonCard = () => {
-  return (
-    <Card className="aspect-square flex flex-col align-middle justify-between w-44 mt-3">
-      <CardHeader className="py-2">
-        <Skeleton className="w-full text-center h-6" />
-      </CardHeader>
-      <Separator />
-      <CardContent className="px-0 pb-0 flex justify-center">
-        <Skeleton className="w-[100px] h-[100px]" />
-      </CardContent>
-      <Separator />
-      <CardFooter className="w-full flex justify-center pb-0 px-0">
-        <Skeleton className="h-9 w-full" />
-      </CardFooter>
-    </Card>
-  );
+	return (
+		<Card className="mt-3 aspect-square w-44 flex-col justify-between">
+			<Box className="py-2">
+				<Skeleton className="h-6 w-full" />
+			</Box>
+			<Box className="items-center px-0 pb-0">
+				<Skeleton className="h-[100px] w-[100px]" />
+			</Box>
+			<Box className="w-full items-center px-0 pb-0">
+				<Skeleton className="h-9 w-full" />
+			</Box>
+		</Card>
+	);
 };
 
-export const PokemonCard = ({ poke, boxNum }: { poke: Pokemon; boxNum: number }) => {
-  const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
-  const { url: spriteUrl } = usePokemonSpriteUrl(poke);
-  const [, setIsLoaded] = useState(false);
+export const PokemonCard = ({
+	poke,
+	boxNum,
+}: {
+	poke: Pokemon;
+	boxNum: number;
+}) => {
+	const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
+	const { url: spriteUrl } = usePokemonSpriteUrl(poke);
 
-  const handleLoad = () => {
-    setIsLoaded(true);
-  };
+	const handleCaught = () => {
+		setPokemonCaught(poke.id, !caught, boxNum);
+	};
 
-  const handleCaught = () => {
-    setPokemonCaught(poke.id, !caught, boxNum);
-  };
-
-  return (
-    <Card
-      className="relative aspect-square flex flex-col align-middle justify-between w-44 mt-3"
-      onClick={handleCaught}
-    >
-      <button
-        type="button"
-        aria-label={`${poke.displayName} details`}
-        className="absolute top-1 right-1 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-border/80 bg-background/95 text-foreground shadow-sm transition-opacity hover:opacity-90"
-        onClick={(e) => {
-          e.stopPropagation();
-          openPokemonInfo(poke.speciesId, poke.id);
-        }}
-      >
-        <Info className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-      </button>
-      <CardHeader className="py-2">
-        <CardTitle className="w-full text-center">
-          {poke.displayName}
-        </CardTitle>
-      </CardHeader>
-      <Separator />
-      <CardContent className="px-0 pb-0 flex justify-center">
-        <LazyLoadImage
-          src={spriteUrl}
-          alt={poke.displayName}
-          className="w-[100px] h-[100px]"
-          width={100}
-          height={100}
-          onLoad={handleLoad}
-          placeholder={<Skeleton className="w-[100px] h-[100px]" />}
-        />
-      </CardContent>
-      <Separator />
-      <CardFooter className="w-full flex justify-center pb-0 px-0">
-        <Button
-          className={cn(
-            'w-full',
-            caught ? 'bg-green-500 hover:bg-green-700' : 'bg-red-500 hover:bg-red-700',
-          )}
-        >
-          {caught ? 'Caught' : 'Uncaught'}
-        </Button>
-      </CardFooter>
-    </Card>
-  );
+	return (
+		<Pressable onPress={handleCaught}>
+			<Card className="relative mt-3 aspect-square w-44 flex-col justify-between">
+				<Pressable
+					accessibilityLabel={`${poke.displayName} details`}
+					onPress={() => openPokemonInfo(poke.speciesId, poke.id)}
+					className="absolute right-1 top-1 z-10 h-7 w-7 items-center justify-center rounded-full border border-border bg-background"
+				>
+					<MaterialIcons name="info-outline" size={18} color="#333" />
+				</Pressable>
+				<Box className="py-2">
+					<Text className="text-center text-base font-semibold text-card-foreground">
+						{poke.displayName}
+					</Text>
+				</Box>
+				<Box className="items-center px-0 pb-0">
+					<Image
+						source={{ uri: spriteUrl }}
+						style={{ width: 100, height: 100 }}
+						contentFit="contain"
+						transition={200}
+					/>
+				</Box>
+				<Box
+					className={`w-full py-2 ${caught ? "bg-green-500" : "bg-red-500"}`}
+				>
+					<Text className="text-center text-sm font-medium text-white">
+						{caught ? "Caught" : "Uncaught"}
+					</Text>
+				</Box>
+			</Card>
+		</Pressable>
+	);
 };

@@ -1,43 +1,51 @@
 # National Dex Tracker
 
-A single-page web app for tracking progress through the Pokémon national Pokédex. Species, sprites, and details are loaded from the public [PokeAPI GraphQL](https://beta.pokeapi.co/graphql/v1beta2) endpoint; progress and filters persist in the browser.
+An Expo app (web, iOS, Android) for tracking progress through the Pokémon national Pokédex. Species, sprites, and details are loaded from the public [PokeAPI GraphQL](https://beta.pokeapi.co/graphql/v1beta2) endpoint; progress and filters persist locally.
 
 ## Tech stack
 
 | Area | Choices |
 |------|---------|
-| UI | React 19, TypeScript |
-| Build | Vite 8, `@vitejs/plugin-react-swc` |
-| Styling | Tailwind CSS 4 (`@tailwindcss/vite`) |
+| UI | React 19, React Native, TypeScript |
+| Build | Expo SDK 54 (Metro); static web via `expo export -p web` |
+| Styling | NativeWind v5 / Tailwind 4, [Gluestack UI](https://gluestack.io/) (CLI-generated components under `src/components/ui/`) |
 | Server state | TanStack Query (React Query) |
-| Client state | Legend State |
+| Client state | Legend State + AsyncStorage persistence |
 | API | GraphQL via `fetch`; types and documents from GraphQL Code Generator (`client` preset) |
-| Components | Radix UI primitives, shadcn-style patterns (`components.json`) |
+| Images | `expo-image` |
 
-Linting in CI-friendly scripts uses [Oxlint](https://oxc.rs/docs/guide/usage/linter.html); ESLint remains available in the repo for editor integration if configured locally.
+Linting uses [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) via `npm run lint`.
 
 ## Prerequisites
 
 - **Node.js** 22+ (matches [Netlify](netlify.toml) production builds)
-- **npm** (used in Netlify) or **Bun** (works with the same scripts; e.g. `bun dev`)
-
-This repo includes [`.npmrc`](.npmrc) with `legacy-peer-deps=true` for dependency resolution; keep that in mind if you switch package managers.
+- **npm** (used in Netlify) or another compatible package manager
 
 ## Setup and build
 
 ```bash
 # install dependencies
-npm ci          # or: npm install / bun install
+npm ci          # or: npm install
 
-# local development (HMR)
-npm run dev     # or: bun dev
+# development (Expo dev server)
+npm run start
 
-# production bundle → dist/
+# web in the browser (does not auto-launch a browser; open the URL Metro prints)
+npm run web
+
+# production static web bundle → dist/
 npm run build
-
-# serve the production build locally
-npm run preview
 ```
+
+For native builds, use `npm run ios` or `npm run android` after configuring the Expo dev environment (Xcode / Android SDK) as in the [Expo docs](https://docs.expo.dev/).
+
+### Web dev: `BROWSER` / `spawn … ENOENT`
+
+Expo opens the dev URL with [better-opn](https://www.npmjs.com/package/better-opn), which honors the `BROWSER` environment variable (same idea as Create React App). If `BROWSER` is set to a binary that is not on your `PATH` (for example `firedragon`), Node throws `spawn firedragon ENOENT` and the CLI exits.
+
+- **Default:** `npm run web` / `bun run web` sets `BROWSER=none` so Metro keeps running; open `http://localhost:8081` (or the URL shown) in your browser yourself.
+- **Auto-open:** Fix `BROWSER` (install the browser or point it at something on `PATH`, e.g. `firefox` or `chromium`), then run `npm run web:open` or `BROWSER=firefox bunx expo start --web`.
+- **One-off:** `BROWSER=none bunx expo start --web`
 
 ### GraphQL code generation
 
@@ -51,22 +59,23 @@ npm run codegen
 
 | Script | Purpose |
 |--------|---------|
-| `dev` | Vite dev server |
-| `build` | Optimized static output to `dist/` |
-| `preview` | Preview the production build |
+| `start` | Expo dev server (`expo start`) |
+| `web` | Web dev server without auto-opening a browser (`BROWSER=none`) |
+| `web:open` | Same as `expo start --web` (uses your `BROWSER` env) |
+| `ios` / `android` | Native run targets |
+| `build` | Static web export to `dist/` (`expo export -p web`) |
 | `lint` / `lint:fix` | Oxlint |
 | `codegen` | GraphQL Code Generator → `src/gql/` |
 
 ## Deployment
 
-The app is a static SPA (`vite` `base: './'`). [netlify.toml](netlify.toml) runs `npm ci && npm run build`, publishes `dist/`, and rewrites all routes to `index.html` for client-side routing and deep links.
+[netlify.toml](netlify.toml) runs `npm ci && npx expo export -p web`, publishes `dist/`, and rewrites routes to `index.html` for SPA hosting. GitHub Pages uses the workflow in [.github/workflows/expo-pages.yml](.github/workflows/expo-pages.yml).
 
 ## For reviewers
 
 - **End-to-end typing**: GraphQL operations are colocated with the UI; codegen produces typed document helpers and operation result types, reducing drift between the API and components.
-- **Clear state split**: Async species and detail data flow through TanStack Query; UI preferences, boxes, and catch progress use Legend State with persistence-oriented patterns suitable for a tracker.
-- **Modern frontend defaults**: React 19, Vite + SWC, Tailwind 4 via the official Vite plugin, and accessible primitives (Radix) for dialogs, menus, and form controls.
-- **Real public API**: No custom backend; the app demonstrates integrating a documented third-party GraphQL API, error handling, and loading states in a production-shaped UI.
+- **Clear state split**: Async species and detail data flow through TanStack Query; UI preferences, boxes, and catch progress use Legend State with persistence.
+- **Cross-platform**: Same React Native tree serves mobile and web; web persistence reuses browser `localStorage` keys compatible with the previous Vite deployment.
 
 ## License
 

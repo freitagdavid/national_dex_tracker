@@ -1,12 +1,18 @@
-import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { Image } from 'expo-image';
+import { ScrollView, Pressable } from 'react-native';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+  Modal,
+  ModalBackdrop,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+} from '@/components/ui/modal';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Box } from '@/components/ui/box';
+import { Heading } from '@/components/ui/heading';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Text } from '@/components/ui/text';
+import { CryPlayer } from '@/components/CryPlayer';
 import {
   app,
   closePokemonInfo,
@@ -24,7 +30,6 @@ import {
 } from '@/components/PokemonInfo/detailQueries';
 import { usePokemonListImageTheme } from '@/hooks/usePokemonListImageTheme';
 import { useModalPokemonSpriteUrl } from '@/hooks/useModalPokemonSpriteUrl';
-import { cn } from '@/lib/utils';
 import { InfoModalSpriteVariations } from '@/components/PokemonInfo/InfoModalSpriteVariations';
 import { InfoModalVersionSelect } from '@/components/PokemonInfo/InfoModalVersionSelect';
 import { PokemonInfoModalBodySkeleton } from '@/components/PokemonInfo/PokemonInfoModalSkeleton';
@@ -53,7 +58,7 @@ import {
   pickPokemonCryUrl,
 } from '@/components/PokemonInfo/infoModalUtils';
 import { formatDexListLabel } from '@/lib/dexDisplayNumber';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import {
   getOfficialArtworkShinyUrl,
   getOfficialArtworkUrl,
@@ -154,7 +159,7 @@ export function PokemonInfoModal() {
     modalSpriteVersionId,
   );
   const primaryType = pokeForSprite?.types.find(Boolean);
-  const { theme, onArtLoad } = usePokemonListImageTheme(spriteUrl, primaryType, spriteColorKey);
+  const { theme } = usePokemonListImageTheme(spriteUrl, primaryType, spriteColorKey);
 
   const cryPokemonId = defaultMon?.id;
 
@@ -245,8 +250,10 @@ export function PokemonInfoModal() {
   const flavorPick = flavorRowForVersion(flavorRows, effFlavorVid);
   const flavorText = flavorPick ? formatFlavorText(flavorPick.flavor_text) : null;
   const flavorGameLabel =
-    flavorPick?.pokemon_v2_version?.pokemon_v2_versionnames[0]?.name ??
-    (effFlavorVid != null ? `Version ${effFlavorVid}` : null);
+    effFlavorVid != null
+      ? ((versionRows ?? []).find((x) => x.version_id === effFlavorVid)?.name ??
+        `Version ${effFlavorVid}`)
+      : null;
 
   const versionGroupForMoves = effectiveVersionGroupIdForMoves(
     selectedVersionId,
@@ -318,103 +325,97 @@ export function PokemonInfoModal() {
 
   const evolvesFrom = speciesRow?.evolves_from;
 
-  const dialogTitleRef = useRef<HTMLHeadingElement>(null);
-
   return (
     <>
-      <Dialog
-        open={open}
-        onOpenChange={(next) => {
-          if (!next) closePokemonInfo();
-        }}
+      <Modal
+        isOpen={open}
+        onClose={closePokemonInfo}
+        size="lg"
+        useRNModal
       >
-        <DialogContent
-          className={cn(
-            'pokemon-info-modal-scroll max-h-[92vh] max-w-lg gap-0 overflow-y-auto border-0 p-0 sm:max-w-xl',
-            'data-[state=open]:animate-in',
-            '[&>button]:z-30 [&>button]:text-inherit [&>button]:opacity-80 hover:[&>button]:opacity-100',
-          )}
+        <ModalBackdrop />
+        <ModalContent
+          className="max-h-[92vh] max-w-xl gap-0 border-0 p-0 sm:max-w-xl"
           style={{
             backgroundColor: theme.cardBg,
-            color: theme.text,
-            ['--pim-scroll-track' as string]: theme.artBlob,
-            ['--pim-scroll-thumb' as string]: theme.text,
-            scrollbarColor: `${theme.text} ${theme.artBlob}`,
-          }}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            dialogTitleRef.current?.focus();
           }}
         >
-          <DialogHeader
-            className="sticky top-0 z-20 space-y-2 border-b px-6 py-4 pr-14 text-left"
+          <ModalHeader
+            className="z-20 flex-col gap-2 border-b px-6 py-4 pr-14"
             style={{
               backgroundColor: theme.cardBg,
               borderColor: `${theme.text}22`,
             }}
           >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0 space-y-1">
-                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <DialogTitle
-                    ref={dialogTitleRef}
-                    tabIndex={-1}
-                    className="text-xl font-bold tracking-tight outline-none"
+            <ModalCloseButton className="absolute right-3 top-3 z-30" />
+            <Box className="flex w-full flex-row flex-wrap items-start justify-between gap-3">
+              <Box className="min-w-0 flex-1 gap-1">
+                <Box className="flex w-full flex-row flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <Heading
+                    size="xl"
+                    className="font-bold tracking-tight text-foreground"
                     style={{ color: theme.text }}
                   >
                     {speciesDisplayName}
-                  </DialogTitle>
+                  </Heading>
                   {detailQuery.isLoading && speciesId != null ? (
-                    <span
+                    <Text
                       className="font-mono text-sm font-normal tabular-nums opacity-75"
                       style={{ color: theme.text }}
                     >
                       {formatDexListLabel(speciesId)}
-                    </span>
+                    </Text>
                   ) : speciesRow ? (
-                    <div
-                      className="flex flex-col items-end gap-0.5 text-right font-mono text-sm font-normal tabular-nums opacity-75"
-                      style={{ color: theme.text }}
-                    >
+                    <Box className="flex flex-col items-end gap-0.5 text-right font-mono text-sm font-normal tabular-nums opacity-75">
                       {selectedVersionId === 0 ? (
-                        <span title="National Pokédex">
+                        <Text style={{ color: theme.text }}>
                           {formatDexListLabel(modalDex.national)}
-                        </span>
+                        </Text>
                       ) : modalDex.local != null && modalDex.regionLabel != null ? (
                         <>
-                          <span title={`${modalDex.regionLabel} Pokédex`}>
-                            {modalDex.regionLabel} {formatDexListLabel(modalDex.local)}
-                          </span>
-                          <span className="text-xs opacity-70" title="National Pokédex">
+                          <Text style={{ color: theme.text }}>
+                            {modalDex.regionLabel}{" "}
+                            {formatDexListLabel(modalDex.local)}
+                          </Text>
+                          <Text
+                            className="text-xs opacity-70"
+                            style={{ color: theme.text }}
+                          >
                             National {formatDexListLabel(modalDex.national)}
-                          </span>
+                          </Text>
                         </>
                       ) : (
                         <>
-                          <span className="max-w-40 text-xs leading-snug opacity-90">
-                            No regional # for{' '}
+                          <Text
+                            className="max-w-40 text-xs leading-snug opacity-90"
+                            style={{ color: theme.text }}
+                          >
+                            No regional # for{" "}
                             {modalDex.versionLabel ?? `version ${selectedVersionId}`}
-                          </span>
-                          <span className="text-xs opacity-70" title="National Pokédex">
+                          </Text>
+                          <Text
+                            className="text-xs opacity-70"
+                            style={{ color: theme.text }}
+                          >
                             National {formatDexListLabel(modalDex.national)}
-                          </span>
+                          </Text>
                         </>
                       )}
-                    </div>
+                    </Box>
                   ) : null}
-                </div>
-                <div className="min-h-5 space-y-2">
+                </Box>
+                <Box className="min-h-5 gap-2">
                   {detailQuery.isLoading ? (
                     <Skeleton className="mt-0.5 h-4 w-40 max-w-full bg-black/20 dark:bg-white/25" />
                   ) : genus ? (
-                    <p className="text-sm opacity-90" style={{ color: theme.text }}>
+                    <Text className="text-sm opacity-90" style={{ color: theme.text }}>
                       {genus}
-                    </p>
+                    </Text>
                   ) : null}
                   {!detailQuery.isLoading && speciesClassificationTags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
+                    <Box className="flex flex-row flex-wrap gap-1.5">
                       {speciesClassificationTags.map((tag) => (
-                        <span
+                        <Text
                           key={tag}
                           className="rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
                           style={{
@@ -424,53 +425,52 @@ export function PokemonInfoModal() {
                           }}
                         >
                           {tag}
-                        </span>
+                        </Text>
                       ))}
-                    </div>
+                    </Box>
                   )}
-                </div>
-              </div>
-              <div className="flex w-full shrink-0 flex-col gap-2 sm:w-56">
+                </Box>
+              </Box>
+              <Box className="w-full shrink-0 gap-2 sm:w-56">
                 <InfoModalVersionSelect />
-              </div>
-            </div>
-          </DialogHeader>
+              </Box>
+            </Box>
+          </ModalHeader>
 
-          <div className="relative z-0 flex flex-col gap-4 px-6 py-4">
+          <ScrollView
+            className="max-h-[70vh]"
+            contentContainerStyle={{ gap: 16, paddingHorizontal: 24, paddingVertical: 16 }}
+          >
+          <Box className="relative z-0 flex-col gap-4">
             {detailQuery.isLoading && <PokemonInfoModalBodySkeleton pillBg={theme.pillBg} />}
 
             {detailQuery.isError && (
-              <p className="text-sm opacity-90" style={{ color: theme.text }}>
-                {(detailQuery.error as Error)?.message ?? 'Could not load details.'}
-              </p>
+              <Text className="text-sm opacity-90" style={{ color: theme.text }}>
+                {(detailQuery.error as Error)?.message ?? "Could not load details."}
+              </Text>
             )}
 
             {detailQuery.isSuccess && speciesRow && (
               <>
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
-                  <div
+                <Box className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
+                  <Box
                     className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-2xl"
                     style={{ backgroundColor: theme.artBlob }}
                   >
-                    <LazyLoadImage
-                      src={spriteUrl}
-                      alt={speciesDisplayName}
-                      width={144}
-                      height={144}
-                      crossOrigin="anonymous"
-                      className="relative z-0 h-32 w-32 object-contain drop-shadow-md"
-                      onLoad={(e) => onArtLoad(e.currentTarget)}
-                      placeholder={<Skeleton className="h-32 w-32 rounded-lg opacity-30" />}
+                    <Image
+                      source={{ uri: spriteUrl }}
+                      style={{ width: 128, height: 128 }}
+                      contentFit="contain"
                     />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-2">
+                  </Box>
+                  <Box className="min-w-0 flex-1 gap-2">
                     {defaultMon && (
-                      <div className="flex flex-wrap gap-2">
+                      <Box className="flex flex-row flex-wrap gap-2">
                         {defaultMon.pokemon_v2_pokemontypes.map((t) => {
                           const name = t.pokemon_v2_type?.name;
                           if (!name) return null;
                           return (
-                            <span
+                            <Text
                               key={`${t.slot}-${name}`}
                               className="rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
                               style={{
@@ -480,36 +480,47 @@ export function PokemonInfoModal() {
                               }}
                             >
                               {name}
-                            </span>
+                            </Text>
                           );
                         })}
-                      </div>
+                      </Box>
                     )}
-                    <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm opacity-95">
-                      <dt className="opacity-75">Height</dt>
-                      <dd>{displayHeightDm(defaultMon?.height)}</dd>
-                      <dt className="opacity-75">Weight</dt>
-                      <dd>{displayWeightHg(defaultMon?.weight)}</dd>
-                      <dt className="opacity-75">Capture rate</dt>
-                      <dd>{speciesRow.capture_rate ?? '—'}</dd>
-                      <dt className="opacity-75">Base happiness</dt>
-                      <dd>{speciesRow.base_happiness ?? '—'}</dd>
-                      <dt className="opacity-75">Hatch cycles</dt>
-                      <dd>{speciesRow.hatch_counter ?? '—'}</dd>
-                      <dt className="opacity-75">Gender</dt>
-                      <dd>{genderRateLabel(speciesRow.gender_rate)}</dd>
-                      <dt className="opacity-75">Growth</dt>
-                      <dd className="capitalize">{speciesRow.pokemon_v2_growthrate?.name ?? '—'}</dd>
-                      <dt className="opacity-75">Generation</dt>
-                      <dd>
-                        {speciesRow.pokemon_v2_generation?.pokemon_v2_generationnames[0]?.name ??
-                          (speciesRow.pokemon_v2_generation?.id != null
-                            ? String(speciesRow.pokemon_v2_generation.id)
-                            : '—')}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
+                    <Box className="gap-1 text-sm opacity-95">
+                      {(
+                        [
+                          ["Height", displayHeightDm(defaultMon?.height)],
+                          ["Weight", displayWeightHg(defaultMon?.weight)],
+                          ["Capture rate", String(speciesRow.capture_rate ?? "—")],
+                          ["Base happiness", String(speciesRow.base_happiness ?? "—")],
+                          ["Hatch cycles", String(speciesRow.hatch_counter ?? "—")],
+                          ["Gender", genderRateLabel(speciesRow.gender_rate)],
+                          [
+                            "Growth",
+                            speciesRow.pokemon_v2_growthrate?.name ?? "—",
+                          ],
+                          [
+                            "Generation",
+                            speciesRow.pokemon_v2_generation?.pokemon_v2_generationnames[0]
+                              ?.name ??
+                              (speciesRow.pokemon_v2_generation?.id != null
+                                ? String(speciesRow.pokemon_v2_generation.id)
+                                : "—"),
+                          ],
+                        ] as const
+                      ).map(([k, v]) => (
+                        <Box
+                          key={k}
+                          className="w-full flex-row justify-between gap-3 py-0.5"
+                        >
+                          <Text className="opacity-75">{k}</Text>
+                          <Text className="max-w-[60%] text-right capitalize">
+                            {v}
+                          </Text>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
 
                 <InfoModalSpriteVariations
                   entries={spriteVariationEntries}
@@ -517,391 +528,456 @@ export function PokemonInfoModal() {
                   themeText={theme.text}
                 />
 
-                <section className="space-y-2 rounded-xl px-3 py-3" style={{ backgroundColor: theme.pillBg }}>
-                  <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                <Box
+                  className="gap-2 rounded-xl px-3 py-3"
+                  style={{ backgroundColor: theme.pillBg }}
+                >
+                  <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                     Pokédex
                     {flavorGameLabel ? (
-                      <span className="ml-2 font-normal opacity-80">({flavorGameLabel})</span>
+                      <Text className="ml-2 font-normal opacity-80">
+                        {" "}
+                        ({flavorGameLabel})
+                      </Text>
                     ) : null}
-                  </h3>
+                  </Text>
                   {flavorText ? (
-                    <p className="text-sm leading-relaxed opacity-95" style={{ color: theme.text }}>
+                    <Text
+                      className="text-sm leading-relaxed opacity-95"
+                      style={{ color: theme.text }}
+                    >
                       {flavorText}
-                    </p>
+                    </Text>
                   ) : (
-                    <p className="text-sm opacity-80" style={{ color: theme.text }}>
+                    <Text className="text-sm opacity-80" style={{ color: theme.text }}>
                       No English Pokédex entry for this game selection.
-                    </p>
+                    </Text>
                   )}
-                </section>
+                </Box>
 
-                <section className="space-y-2">
-                  <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                <Box className="gap-2">
+                  <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                     Cry
-                  </h3>
-                  <div className="min-h-9">
+                  </Text>
+                  <Box className="min-h-9">
                     {cryQuery.isLoading && (
                       <Skeleton className="h-9 w-full max-w-md rounded-md bg-black/20 dark:bg-white/25" />
                     )}
                     {cryQuery.isError && (
-                      <p className="text-sm opacity-80" style={{ color: theme.text }}>
-                        {(cryQuery.error as Error)?.message ?? 'Could not load cry.'}
-                      </p>
+                      <Text className="text-sm opacity-80" style={{ color: theme.text }}>
+                        {(cryQuery.error as Error)?.message ?? "Could not load cry."}
+                      </Text>
                     )}
                     {cryQuery.isSuccess && cryAudioSrc ? (
-                      <>
-                        {/* Cry is audio-only from PokéAPI; no caption source exists. */}
-                        {/* biome-ignore lint/a11y/useMediaCaption: no captions available for game cry assets */}
-                        <audio
-                          key={`${cryGameGen ?? 'na'}|${cryAudioSrc}`}
-                          controls
-                          className="h-9 w-full max-w-md"
-                          src={cryAudioSrc}
-                        />
-                      </>
+                      <CryPlayer
+                        key={`${cryGameGen ?? "na"}|${cryAudioSrc}`}
+                        src={cryAudioSrc}
+                      />
                     ) : null}
                     {cryQuery.isSuccess && !cryAudioSrc && !cryQuery.isLoading ? (
-                      <p className="text-sm opacity-80" style={{ color: theme.text }}>
+                      <Text className="text-sm opacity-80" style={{ color: theme.text }}>
                         No cry audio for this Pokémon.
-                      </p>
+                      </Text>
                     ) : null}
-                  </div>
-                </section>
+                  </Box>
+                </Box>
 
-                <section className="space-y-2">
-                  <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
-                    Habitat &amp; appearance
-                  </h3>
-                  <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm opacity-95">
-                    <dt className="opacity-75">Color</dt>
-                    <dd className="capitalize">{speciesRow.pokemon_v2_pokemoncolor?.name ?? '—'}</dd>
-                    <dt className="opacity-75">Habitat</dt>
-                    <dd className="capitalize">{speciesRow.pokemon_v2_pokemonhabitat?.name ?? '—'}</dd>
-                    <dt className="opacity-75">Shape</dt>
-                    <dd className="capitalize">{speciesRow.pokemon_v2_pokemonshape?.name ?? '—'}</dd>
-                    <dt className="opacity-75">Gender sprites</dt>
-                    <dd>
-                      {speciesRow.has_gender_differences === true
-                        ? 'Different male / female artwork'
-                        : '—'}
-                    </dd>
-                  </dl>
-                </section>
+                <Box className="gap-2">
+                  <Text className="text-sm font-semibold" style={{ color: theme.text }}>
+                    Habitat & appearance
+                  </Text>
+                  <Box className="gap-1 text-sm opacity-95">
+                    {(
+                      [
+                        ["Color", speciesRow.pokemon_v2_pokemoncolor?.name ?? "—"],
+                        ["Habitat", speciesRow.pokemon_v2_pokemonhabitat?.name ?? "—"],
+                        ["Shape", speciesRow.pokemon_v2_pokemonshape?.name ?? "—"],
+                        [
+                          "Gender sprites",
+                          speciesRow.has_gender_differences === true
+                            ? "Different male / female artwork"
+                            : "—",
+                        ],
+                      ] as const
+                    ).map(([k, v]) => (
+                      <Box
+                        key={k}
+                        className="w-full flex-row justify-between gap-3 py-0.5"
+                      >
+                        <Text className="opacity-75">{k}</Text>
+                        <Text className="max-w-[60%] text-right capitalize">{v}</Text>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
 
-                <section className="space-y-2">
-                  <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                <Box className="gap-2">
+                  <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                     Egg groups
-                  </h3>
-                  <p className="text-sm capitalize opacity-95" style={{ color: theme.text }}>
+                  </Text>
+                  <Text
+                    className="text-sm capitalize opacity-95"
+                    style={{ color: theme.text }}
+                  >
                     {speciesRow.pokemon_v2_pokemonegggroups
                       .map((g) => g.pokemon_v2_egggroup?.name)
                       .filter(Boolean)
-                      .join(', ') || '—'}
-                  </p>
-                </section>
+                      .join(", ") || "—"}
+                  </Text>
+                </Box>
 
                 {((selectedVersionId === 0 &&
                   (dexTableRows.length > 0 || speciesRow.order != null)) ||
                   selectedVersionId !== 0) && (
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                  <Box className="gap-2">
+                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                       Pokédex numbers
-                    </h3>
+                    </Text>
                     {selectedVersionId === 0 ? (
                       <>
                         {showNationalDexTable && (
                           <>
-                            <p className="text-xs opacity-75" style={{ color: theme.text }}>
+                            <Text className="text-xs opacity-75" style={{ color: theme.text }}>
                               Main-series Pokédex listings (PokéAPI). The national dex row is
                               highlighted.
-                            </p>
-                            <div
-                              className="overflow-x-auto rounded-lg border text-sm"
+                            </Text>
+                            <Box
+                              className="rounded-lg border p-2 text-sm"
                               style={{ borderColor: theme.pillBorder }}
                             >
-                              <table className="w-full min-w-70 border-collapse">
-                                <thead>
-                                  <tr
-                                    className="border-b text-left text-xs uppercase tracking-wide opacity-75"
-                                    style={{ borderColor: `${theme.text}22` }}
+                              <Box className="mb-1 flex-row border-b pb-1">
+                                <Text
+                                  className="flex-1 text-xs font-medium uppercase opacity-75"
+                                  style={{ color: theme.text }}
+                                >
+                                  Region
+                                </Text>
+                                <Text
+                                  className="w-24 text-xs font-medium uppercase opacity-75"
+                                  style={{ color: theme.text }}
+                                >
+                                  Dex
+                                </Text>
+                                <Text
+                                  className="w-10 text-right text-xs font-medium uppercase opacity-75"
+                                  style={{ color: theme.text }}
+                                >
+                                  #
+                                </Text>
+                              </Box>
+                              {dexTableRows.map((row) => {
+                                const highlight = row.dexName === "national";
+                                return (
+                                  <Box
+                                    key={row.key}
+                                    className="flex-row border-b border-border/20 py-1.5"
+                                    style={
+                                      highlight
+                                        ? { backgroundColor: theme.pillBg }
+                                        : undefined
+                                    }
                                   >
-                                    <th className="px-2 py-1.5 font-medium">Region</th>
-                                    <th className="px-2 py-1.5 font-medium">Pokédex</th>
-                                    <th className="px-2 py-1.5 text-right font-medium">#</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {dexTableRows.map((row) => {
-                                    const highlight = row.dexName === 'national';
-                                    return (
-                                      <tr
-                                        key={row.key}
-                                        className="border-b last:border-0"
-                                        style={{
-                                          borderColor: `${theme.text}18`,
-                                          ...(highlight ? { backgroundColor: theme.pillBg } : {}),
-                                        }}
-                                      >
-                                        <td className="px-2 py-1.5">{row.regionLabel}</td>
-                                        <td className="px-2 py-1.5 font-mono text-xs opacity-90">
-                                          {row.dexName}
-                                        </td>
-                                        <td className="px-2 py-1.5 text-right tabular-nums">
-                                          {row.num}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
+                                    <Text className="flex-1 text-sm" style={{ color: theme.text }}>
+                                      {row.regionLabel}
+                                    </Text>
+                                    <Text
+                                      className="w-24 font-mono text-xs opacity-90"
+                                      style={{ color: theme.text }}
+                                    >
+                                      {row.dexName}
+                                    </Text>
+                                    <Text
+                                      className="w-10 text-right text-sm tabular-nums"
+                                      style={{ color: theme.text }}
+                                    >
+                                      {row.num}
+                                    </Text>
+                                  </Box>
+                                );
+                              })}
+                            </Box>
                           </>
                         )}
                         {speciesRow.order != null && (
-                          <p className="text-xs opacity-75" style={{ color: theme.text }}>
+                          <Text className="text-xs opacity-75" style={{ color: theme.text }}>
                             Internal Pokédex sort order: {speciesRow.order}
-                          </p>
+                          </Text>
                         )}
                       </>
                     ) : (
                       <>
-                        <p className="text-sm opacity-95" style={{ color: theme.text }}>
+                        <Text className="text-sm opacity-95" style={{ color: theme.text }}>
                           {modalDex.local != null && modalDex.regionLabel != null ? (
-                            <span className="font-mono tabular-nums">
-                              {modalDex.regionLabel} {formatDexListLabel(modalDex.local)}
-                            </span>
+                            <Text className="font-mono tabular-nums">
+                              {modalDex.regionLabel}{" "}
+                              {formatDexListLabel(modalDex.local)}
+                            </Text>
                           ) : (
-                            <span className="opacity-90">
-                              No main-series regional number for this game&apos;s region in PokéAPI
-                              {modalDex.versionLabel != null ? ` (${modalDex.versionLabel})` : ''}.
-                            </span>
+                            <Text className="opacity-90">
+                              No main-series regional number for this game&apos;s region in
+                              PokéAPI
+                              {modalDex.versionLabel != null
+                                ? ` (${modalDex.versionLabel})`
+                                : ""}
+                              .
+                            </Text>
                           )}
-                        </p>
-                        <p className="text-xs opacity-75" style={{ color: theme.text }}>
+                        </Text>
+                        <Text className="text-xs opacity-75" style={{ color: theme.text }}>
                           Local number uses only the game selected in this modal (
-                          {modalDex.versionLabel ?? `version ${selectedVersionId}`}), not the list
-                          Region or Game filters.
-                        </p>
+                          {modalDex.versionLabel ?? `version ${selectedVersionId}`}), not the
+                          list Region or Game filters.
+                        </Text>
                         {speciesRow.order != null && (
-                          <p className="text-xs opacity-75" style={{ color: theme.text }}>
+                          <Text className="text-xs opacity-75" style={{ color: theme.text }}>
                             Internal Pokédex sort order: {speciesRow.order}
-                          </p>
+                          </Text>
                         )}
                       </>
                     )}
-                  </section>
+                  </Box>
                 )}
 
                 {(speciesRestQuery.isLoading ||
                   speciesRestQuery.isError ||
                   speciesNoteParagraphs.length > 0) && (
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
-                      Species &amp; form notes
-                    </h3>
+                  <Box className="gap-2">
+                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
+                      Species & form notes
+                    </Text>
                     {speciesRestQuery.isLoading && speciesNoteParagraphs.length === 0 && (
                       <Skeleton className="h-16 w-full max-w-md rounded-md bg-black/20 dark:bg-white/25" />
                     )}
                     {speciesRestQuery.isError && (
-                      <p className="text-sm opacity-80" style={{ color: theme.text }}>
-                        {(speciesRestQuery.error as Error)?.message ?? 'Could not load form notes.'}
-                      </p>
+                      <Text className="text-sm opacity-80" style={{ color: theme.text }}>
+                        {(speciesRestQuery.error as Error)?.message ??
+                          "Could not load form notes."}
+                      </Text>
                     )}
                     {speciesNoteParagraphs.map((para, i) => (
-                      <p
+                      <Text
                         key={`${i}-${para.slice(0, 48)}`}
                         className="text-sm leading-relaxed opacity-95"
                         style={{ color: theme.text }}
                       >
                         {para}
-                      </p>
+                      </Text>
                     ))}
-                  </section>
+                  </Box>
                 )}
 
                 {heldItemsAggregated.length > 0 && (
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                  <Box className="gap-2">
+                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                       Wild held items
-                    </h3>
-                    <p className="text-xs opacity-75" style={{ color: theme.text }}>
+                    </Text>
+                    <Text className="text-xs opacity-75" style={{ color: theme.text }}>
                       Default form; rarity is the approximate hold chance in games (PokéAPI, %).
-                    </p>
-                    <ul className="space-y-1 text-sm opacity-95">
+                    </Text>
+                    <Box className="gap-1 text-sm opacity-95">
                       {heldItemsAggregated.map((it) => (
-                        <li key={it.itemSlug}>
-                          <span className="font-medium">{it.displayName}</span>
-                          <span className="ml-2 font-mono text-xs opacity-80">
+                        <Text key={it.itemSlug} style={{ color: theme.text }}>
+                          <Text className="font-medium">{it.displayName}</Text>
+                          <Text className="ml-2 font-mono text-xs opacity-80">
                             {it.minRarity === it.maxRarity
                               ? `${it.minRarity}%`
                               : `${it.minRarity}%–${it.maxRarity}%`}
-                          </span>
-                        </li>
+                          </Text>
+                        </Text>
                       ))}
-                    </ul>
-                  </section>
+                    </Box>
+                  </Box>
                 )}
 
                 {(speciesRow.pokemon_v2_palparks ?? []).length > 0 && (
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                  <Box className="gap-2">
+                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                       Pal Park
-                    </h3>
-                    <ul className="space-y-1.5 text-sm opacity-95">
+                    </Text>
+                    <Box className="gap-1.5 text-sm opacity-95">
                       {(speciesRow.pokemon_v2_palparks ?? []).map((p, i) => {
                         const area =
-                          p.pokemon_v2_palparkarea?.pokemon_v2_palparkareanames[0]?.name ?? 'Area';
+                          p.pokemon_v2_palparkarea?.pokemon_v2_palparkareanames[0]?.name ??
+                          "Area";
                         return (
-                          <li key={`${area}-${i}-${p.base_score}-${p.rate}`}>
-                            <span className="font-medium">{area}</span>
-                            <span className="ml-2 text-xs opacity-80">
-                              score {p.base_score ?? '—'} · catch rate {p.rate ?? '—'}
-                            </span>
-                          </li>
+                          <Text
+                            key={`${area}-${i}-${p.base_score}-${p.rate}`}
+                            style={{ color: theme.text }}
+                          >
+                            <Text className="font-medium">{area}</Text>
+                            <Text className="ml-2 text-xs opacity-80">
+                              score {p.base_score ?? "—"} · catch rate {p.rate ?? "—"}
+                            </Text>
+                          </Text>
                         );
                       })}
-                    </ul>
-                  </section>
+                    </Box>
+                  </Box>
                 )}
 
                 {evolvesFrom != null && (
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                  <Box className="gap-2">
+                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                       Evolves from
-                    </h3>
-                    <button
-                      type="button"
-                      className="cursor-pointer rounded-full border px-2.5 py-1 text-xs font-medium capitalize transition-opacity hover:opacity-90 focus:outline-none focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-2"
+                    </Text>
+                    <Pressable
+                      className="self-start rounded-full border px-2.5 py-1"
                       style={{
                         borderColor: theme.pillBorder,
-                        backgroundColor: 'transparent',
-                        color: theme.text,
+                        backgroundColor: "transparent",
                       }}
-                      onClick={() => openPokemonInfo(evolvesFrom.id)}
+                      onPress={() => openPokemonInfo(evolvesFrom.id)}
                     >
-                      {evolvesFrom.pokemon_v2_pokemonspeciesnames[0]?.name ??
-                        displaySpeciesName(evolvesFrom.name)}
-                    </button>
-                  </section>
+                      <Text
+                        className="text-xs font-medium capitalize"
+                        style={{ color: theme.text }}
+                      >
+                        {evolvesFrom.pokemon_v2_pokemonspeciesnames[0]?.name ??
+                          displaySpeciesName(evolvesFrom.name)}
+                      </Text>
+                    </Pressable>
+                  </Box>
                 )}
 
                 {speciesRow.pokemon_v2_evolutionchain &&
                   speciesRow.pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.length > 1 && (
-                    <section className="space-y-2">
-                      <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                    <Box className="gap-2">
+                      <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                         Evolution
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {speciesRow.pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.map((s) => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            className="cursor-pointer rounded-full border px-2.5 py-1 text-xs font-medium capitalize transition-opacity hover:opacity-90 focus:outline-none focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-2"
-                            style={{
-                              borderColor: theme.pillBorder,
-                              backgroundColor: s.id === speciesRow.id ? theme.pillBg : 'transparent',
-                              color: theme.text,
-                            }}
-                            onClick={() => openPokemonInfo(s.id)}
-                          >
-                            {displaySpeciesName(s.name)}
-                          </button>
-                        ))}
-                      </div>
-                    </section>
+                      </Text>
+                      <Box className="flex-row flex-wrap gap-2">
+                        {speciesRow.pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.map(
+                          (s) => (
+                            <Pressable
+                              key={s.id}
+                              className="rounded-full border px-2.5 py-1"
+                              style={{
+                                borderColor: theme.pillBorder,
+                                backgroundColor:
+                                  s.id === speciesRow.id ? theme.pillBg : "transparent",
+                              }}
+                              onPress={() => openPokemonInfo(s.id)}
+                            >
+                              <Text
+                                className="text-xs font-medium capitalize"
+                                style={{ color: theme.text }}
+                              >
+                                {displaySpeciesName(s.name)}
+                              </Text>
+                            </Pressable>
+                          ),
+                        )}
+                      </Box>
+                    </Box>
                   )}
 
                 {possibleAbilities.length > 0 && (
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                  <Box className="gap-2">
+                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                       Possible abilities
-                    </h3>
-                    <ul className="space-y-2 text-sm opacity-95">
+                    </Text>
+                    <Box className="gap-2 text-sm opacity-95">
                       {possibleAbilities.map((a) => (
-                        <li key={a.abilityId}>
-                          <span className="font-medium">{a.displayName}</span>
+                        <Text key={a.abilityId} style={{ color: theme.text }}>
+                          <Text className="font-medium">{a.displayName}</Text>
                           {a.hiddenOnAny ? (
-                            <span className="ml-2 text-xs opacity-80">
-                              {hasAltForms ? '(hidden on some forms)' : '(hidden)'}
-                            </span>
+                            <Text className="ml-2 text-xs opacity-80">
+                              {hasAltForms ? "(hidden on some forms)" : "(hidden)"}
+                            </Text>
                           ) : null}
-                        </li>
+                        </Text>
                       ))}
-                    </ul>
-                  </section>
+                    </Box>
+                  </Box>
                 )}
 
-                <section className="space-y-2">
-                  <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                <Box className="gap-2">
+                  <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                     Wild encounters
                     {encounterGameLabel ? (
-                      <span className="ml-2 font-normal opacity-80">({encounterGameLabel})</span>
+                      <Text className="ml-2 font-normal opacity-80">
+                        {" "}
+                        ({encounterGameLabel})
+                      </Text>
                     ) : null}
-                  </h3>
-                  <div className="min-h-10">
+                  </Text>
+                  <Box className="min-h-10">
                     {effFlavorVid == null && (
-                      <p className="text-sm opacity-80" style={{ color: theme.text }}>
+                      <Text className="text-sm opacity-80" style={{ color: theme.text }}>
                         Select a specific game in the picker to load encounter locations for that
                         version.
-                      </p>
+                      </Text>
                     )}
                     {effFlavorVid != null && encQuery.isLoading && (
-                      <div className="space-y-3">
+                      <Box className="gap-3">
                         {Array.from({ length: 3 }, (_, i) => (
-                          <div key={i} className="space-y-1.5">
+                          <Box key={i} className="gap-1.5">
                             <Skeleton className="h-3.5 w-48 max-w-full bg-black/20 dark:bg-white/25" />
                             <Skeleton className="h-3 w-full max-w-md bg-black/20 dark:bg-white/25" />
                             <Skeleton className="h-3 w-[85%] max-w-sm bg-black/20 dark:bg-white/25" />
-                          </div>
+                          </Box>
                         ))}
-                      </div>
+                      </Box>
                     )}
                     {effFlavorVid != null && encQuery.isError && (
-                      <p className="text-sm opacity-90" style={{ color: theme.text }}>
-                        {(encQuery.error as Error)?.message ?? 'Could not load encounters.'}
-                      </p>
+                      <Text className="text-sm opacity-90" style={{ color: theme.text }}>
+                        {(encQuery.error as Error)?.message ?? "Could not load encounters."}
+                      </Text>
                     )}
-                    {effFlavorVid != null && encQuery.isSuccess && encounterGroups.length === 0 && (
-                      <p className="text-sm opacity-80" style={{ color: theme.text }}>
-                        No wild encounters in PokéAPI for this species in this game version (it may be
-                        gift-only, evolved only, or data may be incomplete).
-                      </p>
-                    )}
-                    {effFlavorVid != null && encQuery.isSuccess && encounterGroups.length > 0 && (
-                      <ul className="space-y-3 text-sm opacity-95">
-                        {encounterGroups.map((g) => (
-                          <li key={g.place}>
-                            <div className="font-medium" style={{ color: theme.text }}>
-                              {g.place}
-                            </div>
-                            <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs opacity-90">
-                              {g.lines.map((line, i) => (
-                                <li key={`${g.place}-${i}-${line}`}>{line}</li>
-                              ))}
-                            </ul>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </section>
+                    {effFlavorVid != null &&
+                      encQuery.isSuccess &&
+                      encounterGroups.length === 0 && (
+                        <Text className="text-sm opacity-80" style={{ color: theme.text }}>
+                          No wild encounters in PokéAPI for this species in this game version (it
+                          may be gift-only, evolved only, or data may be incomplete).
+                        </Text>
+                      )}
+                    {effFlavorVid != null &&
+                      encQuery.isSuccess &&
+                      encounterGroups.length > 0 && (
+                        <Box className="gap-3 text-sm opacity-95">
+                          {encounterGroups.map((g) => (
+                            <Box key={g.place}>
+                              <Text className="font-medium" style={{ color: theme.text }}>
+                                {g.place}
+                              </Text>
+                              <Box className="mt-1 gap-0.5 pl-2">
+                                {g.lines.map((line, i) => (
+                                  <Text
+                                    key={`${g.place}-${i}-${line}`}
+                                    className="text-xs opacity-90"
+                                    style={{ color: theme.text }}
+                                  >
+                                    • {line}
+                                  </Text>
+                                ))}
+                              </Box>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+                  </Box>
+                </Box>
 
                 {defaultMon && defaultMon.pokemon_v2_pokemonstats.length > 0 && (
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold" style={{ color: theme.text }}>
+                  <Box className="gap-2">
+                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                       Base stats
-                    </h3>
-                    <div className="space-y-1.5">
+                    </Text>
+                    <Box className="gap-1.5">
                       {defaultMon.pokemon_v2_pokemonstats.map((s) => (
-                        <div
+                        <Box
                           key={s.pokemon_v2_stat?.name ?? String(s.base_stat)}
-                          className="flex items-center gap-2 text-sm"
+                          className="flex-row items-center gap-2 text-sm"
                         >
-                          <span className="w-28 shrink-0 font-mono text-xs uppercase opacity-80">
-                            {s.pokemon_v2_stat?.name?.replace(/-/g, ' ') ?? '—'}
-                          </span>
-                          <div className="h-2 min-w-0 flex-1 rounded-full bg-black/10">
-                            <div
+                          <Text
+                            className="w-28 shrink-0 font-mono text-xs uppercase opacity-80"
+                            style={{ color: theme.text }}
+                          >
+                            {s.pokemon_v2_stat?.name?.replace(/-/g, " ") ?? "—"}
+                          </Text>
+                          <Box className="h-2 min-w-0 flex-1 rounded-full bg-black/10">
+                            <Box
                               className="h-2 rounded-full"
                               style={{
                                 width: `${Math.min(100, (s.base_stat / 255) * 100)}%`,
@@ -909,40 +985,44 @@ export function PokemonInfoModal() {
                                 opacity: 0.55,
                               }}
                             />
-                          </div>
-                          <span className="w-8 text-right font-mono tabular-nums">{s.base_stat}</span>
-                        </div>
+                          </Box>
+                          <Text
+                            className="w-8 text-right font-mono tabular-nums"
+                            style={{ color: theme.text }}
+                          >
+                            {s.base_stat}
+                          </Text>
+                        </Box>
                       ))}
-                    </div>
+                    </Box>
                     {defaultMon.base_experience != null && (
-                      <p className="text-muted-foreground text-xs opacity-90" style={{ color: theme.text }}>
+                      <Text className="text-xs opacity-90" style={{ color: theme.text }}>
                         Base experience (defeat): {defaultMon.base_experience}
-                      </p>
+                      </Text>
                     )}
-                  </section>
+                  </Box>
                 )}
 
-                <div className="flex flex-wrap gap-2 pt-1">
+                <Box className="flex-row flex-wrap gap-2 pt-1">
                   <Button
-                    type="button"
                     variant="secondary"
                     className="font-medium"
                     style={{
                       backgroundColor: theme.pillBg,
-                      color: theme.text,
                       borderColor: theme.pillBorder,
                     }}
                     disabled={defaultMon == null || versionGroupForMoves == null}
-                    onClick={() => setPokemonMovesModalOpen(true)}
+                    onPress={() => setPokemonMovesModalOpen(true)}
                   >
-                    Moves in this game
+                    <ButtonText className="text-foreground">Moves in this game</ButtonText>
                   </Button>
-                </div>
+                </Box>
               </>
             )}
-          </div>
-        </DialogContent>
-      </Dialog>
+          </Box>
+          </ScrollView>
+        </ModalContent>
+      </Modal>
 
       <PokemonMovesModal pokemonId={defaultMon?.id ?? null} versionGroupId={versionGroupForMoves} />
     </>
