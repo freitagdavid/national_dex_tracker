@@ -7,6 +7,34 @@ query PokemonSpeciesDetail($id: Int!) {
     base_happiness
     hatch_counter
     evolution_chain_id
+    is_baby
+    is_legendary
+    is_mythical
+    has_gender_differences
+    forms_switchable
+    order
+    pokemon_v2_pokemondexnumbers(order_by: { pokedex_id: asc }) {
+      pokedex_number
+      pokemon_v2_pokedex {
+        name
+        is_main_series
+        pokemon_v2_region {
+          name
+        }
+      }
+    }
+    pokemon_v2_pokemonspeciesdescriptions(where: { language_id: { _eq: 9 } }) {
+      description
+    }
+    pokemon_v2_palparks {
+      base_score
+      rate
+      pokemon_v2_palparkarea {
+        pokemon_v2_palparkareanames(where: { language_id: { _eq: 9 } }) {
+          name
+        }
+      }
+    }
     pokemon_v2_generation {
       id
       pokemon_v2_generationnames(where: { language_id: { _eq: 9 } }) {
@@ -19,6 +47,13 @@ query PokemonSpeciesDetail($id: Int!) {
     pokemon_v2_pokemonspeciesnames(where: { language_id: { _eq: 9 } }) {
       name
       genus
+    }
+    evolves_from: pokemon_v2_pokemonspecy {
+      id
+      name
+      pokemon_v2_pokemonspeciesnames(where: { language_id: { _eq: 9 } }) {
+        name
+      }
     }
     pokemon_v2_pokemonspeciesflavortexts(
       where: { language_id: { _eq: 9 } }
@@ -54,7 +89,7 @@ query PokemonSpeciesDetail($id: Int!) {
         name
       }
     }
-    pokemon_v2_pokemons(where: { is_default: { _eq: true } }, limit: 1) {
+    default_pokemon: pokemon_v2_pokemons(where: { is_default: { _eq: true } }, limit: 1) {
       id
       height
       weight
@@ -66,6 +101,7 @@ query PokemonSpeciesDetail($id: Int!) {
         is_hidden
         slot
         pokemon_v2_ability {
+          id
           name
           pokemon_v2_abilitynames(where: { language_id: { _eq: 9 } }) {
             name
@@ -82,6 +118,31 @@ query PokemonSpeciesDetail($id: Int!) {
         slot
         pokemon_v2_type {
           name
+        }
+      }
+      pokemon_v2_pokemonitems {
+        rarity
+        pokemon_v2_item {
+          name
+          pokemon_v2_itemnames(where: { language_id: { _eq: 9 } }) {
+            name
+          }
+        }
+      }
+    }
+    pokemon_varieties: pokemon_v2_pokemons(order_by: { id: asc }) {
+      id
+      name
+      is_default
+      pokemon_v2_pokemonabilities(order_by: { slot: asc }) {
+        is_hidden
+        slot
+        pokemon_v2_ability {
+          id
+          name
+          pokemon_v2_abilitynames(where: { language_id: { _eq: 9 } }) {
+            name
+          }
         }
       }
     }

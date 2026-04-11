@@ -186,16 +186,20 @@ export function InfoModalVersionSelect() {
         id="info-version-listbox"
         role="listbox"
         aria-label="Game versions for details"
-        className="w-[var(--radix-popover-trigger-width)] min-w-[220px] max-w-[min(100vw-2rem,360px)] p-0"
+        className={cn(
+          'z-[200] flex max-h-[min(22rem,55dvh)] flex-col overflow-hidden p-0',
+          'w-[var(--radix-popover-trigger-width)] min-w-[220px] max-w-[min(100vw-2rem,360px)]',
+        )}
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
           e.preventDefault();
           inputRef.current?.blur();
         }}
+        onWheel={(e) => e.stopPropagation()}
       >
-        <Command shouldFilter={false}>
-          <CommandList className="max-h-64">
+        <Command shouldFilter={false} className="flex max-h-full min-h-0 flex-1 flex-col overflow-hidden">
+          <CommandList className="max-h-full min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
             {filtered.length === 0 ? (
               <CommandEmpty>No versions match.</CommandEmpty>
             ) : (

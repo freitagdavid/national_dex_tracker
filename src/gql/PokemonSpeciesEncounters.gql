@@ -1,0 +1,30 @@
+query PokemonSpeciesEncounters($pokemonIds: [Int!]!, $versionId: Int!) {
+  pokemon_v2_encounter(
+    where: { pokemon_id: { _in: $pokemonIds }, version_id: { _eq: $versionId } }
+    order_by: [{ location_area_id: asc }, { min_level: asc }, { id: asc }]
+  ) {
+    id
+    min_level
+    max_level
+    pokemon_id
+    pokemon_v2_locationarea {
+      id
+      pokemon_v2_locationareanames(where: { language_id: { _eq: 9 } }) {
+        name
+      }
+      pokemon_v2_location {
+        pokemon_v2_locationnames(where: { language_id: { _eq: 9 } }) {
+          name
+        }
+        pokemon_v2_region {
+          name
+        }
+      }
+    }
+    pokemon_v2_encounterslot {
+      pokemon_v2_encountermethod {
+        name
+      }
+    }
+  }
+}

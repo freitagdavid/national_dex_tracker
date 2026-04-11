@@ -65,6 +65,33 @@ export type PokemonSpeciesDetailQuery = {
     base_happiness?: number | null;
     hatch_counter?: number | null;
     evolution_chain_id?: number | null;
+    is_baby?: boolean | null;
+    is_legendary?: boolean | null;
+    is_mythical?: boolean | null;
+    has_gender_differences?: boolean | null;
+    forms_switchable?: boolean | null;
+    order?: number | null;
+    pokemon_v2_pokemondexnumbers?: Array<{
+      pokedex_number: number;
+      pokemon_v2_pokedex?: {
+        name?: string | null;
+        is_main_series?: boolean | null;
+        pokemon_v2_region?: { name?: string | null } | null;
+      } | null;
+    }>;
+    pokemon_v2_pokemonspeciesdescriptions?: Array<{ description: string }>;
+    pokemon_v2_palparks?: Array<{
+      base_score?: number | null;
+      rate?: number | null;
+      pokemon_v2_palparkarea?: {
+        pokemon_v2_palparkareanames: Array<{ name: string }>;
+      } | null;
+    }>;
+    evolves_from?: {
+      id: number;
+      name: string;
+      pokemon_v2_pokemonspeciesnames: Array<{ name: string }>;
+    } | null;
     pokemon_v2_generation?: {
       id: number;
       pokemon_v2_generationnames: Array<{ name: string }>;
@@ -87,7 +114,7 @@ export type PokemonSpeciesDetailQuery = {
       id: number;
       pokemon_v2_pokemonspecies: Array<{ id: number; name: string }>;
     } | null;
-    pokemon_v2_pokemons: Array<{
+    default_pokemon: Array<{
       id: number;
       height?: number | null;
       weight?: number | null;
@@ -97,6 +124,7 @@ export type PokemonSpeciesDetailQuery = {
         is_hidden?: boolean | null;
         slot?: number | null;
         pokemon_v2_ability?: {
+          id: number;
           name: string;
           pokemon_v2_abilitynames: Array<{ name: string }>;
         } | null;
@@ -109,7 +137,48 @@ export type PokemonSpeciesDetailQuery = {
         slot?: number | null;
         pokemon_v2_type?: { name: string } | null;
       }>;
+      pokemon_v2_pokemonitems?: Array<{
+        rarity?: number | null;
+        pokemon_v2_item?: {
+          name: string;
+          pokemon_v2_itemnames: Array<{ name: string }>;
+        } | null;
+      }>;
     }>;
+    pokemon_varieties: Array<{
+      id: number;
+      name: string;
+      is_default?: boolean | null;
+      pokemon_v2_pokemonabilities: Array<{
+        is_hidden?: boolean | null;
+        slot?: number | null;
+        pokemon_v2_ability?: {
+          id: number;
+          name: string;
+          pokemon_v2_abilitynames: Array<{ name: string }>;
+        } | null;
+      }>;
+    }>;
+  }> | null;
+};
+
+export type PokemonSpeciesEncountersQuery = {
+  pokemon_v2_encounter: Array<{
+    id: number;
+    min_level?: number | null;
+    max_level?: number | null;
+    pokemon_id: number;
+    pokemon_v2_locationarea?: {
+      id: number;
+      pokemon_v2_locationareanames: Array<{ name: string }>;
+      pokemon_v2_location?: {
+        pokemon_v2_locationnames: Array<{ name: string }>;
+        pokemon_v2_region?: { name: string } | null;
+      } | null;
+    } | null;
+    pokemon_v2_encounterslot?: {
+      pokemon_v2_encountermethod?: { name: string } | null;
+    } | null;
   }> | null;
 };
 

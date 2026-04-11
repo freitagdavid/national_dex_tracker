@@ -67,11 +67,24 @@ export function PokemonInfoModalBodySkeleton({ pillBg }: { pillBg: string }) {
       </div>
 
       <div className="space-y-2">
-        <Skeleton className={cn('h-4 w-20', shim)} />
+        <Skeleton className={cn('h-4 w-36', shim)} />
         <div className="space-y-2">
-          <Skeleton className={cn('h-4 w-44', shim)} />
-          <Skeleton className={cn('h-4 w-52 max-w-full', shim)} />
-          <Skeleton className={cn('h-4 w-36', shim)} />
+          {Array.from({ length: 4 }, (_, i) => (
+            <Skeleton key={i} className={cn('h-4 w-full max-w-lg', shim)} />
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Skeleton className={cn('h-4 w-48', shim)} />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className={cn('h-3.5 w-48 max-w-full', shim)} />
+              <Skeleton className={cn('h-3 w-full max-w-md', shim)} />
+              <Skeleton className={cn('h-3 w-[85%] max-w-sm', shim)} />
+            </div>
+          ))}
         </div>
       </div>
 

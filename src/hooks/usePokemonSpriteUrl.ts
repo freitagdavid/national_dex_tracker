@@ -64,3 +64,50 @@ export function usePokemonSpriteUrl(poke: Pokemon): PokemonSpriteUrlResult {
 
   return { url: displayUrl, colorCacheKey: baseUrl };
 }
+
+/**
+ * White→transparent for gen I–III-style sprites; pass the stable HTTPS `src` from PokéAPI.
+ */
+export function useChromaKeyedSpriteUrl(httpUrl: string | undefined): {
+  displayUrl: string | undefined;
+  colorCacheKey: string | undefined;
+} {
+  const baseUrl = httpUrl ?? '';
+  const [displayUrl, setDisplayUrl] = useState(baseUrl || undefined);
+  const blobRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setDisplayUrl(baseUrl || undefined);
+
+    if (!baseUrl || !spriteUrlLikelyHasOpaqueWhiteBackground(baseUrl)) {
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      const blobUrl = await spriteUrlToTransparentBlobUrl(baseUrl);
+      if (cancelled) {
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
+        return;
+      }
+      if (blobRef.current) {
+        URL.revokeObjectURL(blobRef.current);
+        blobRef.current = null;
+      }
+      if (blobUrl) {
+        blobRef.current = blobUrl;
+        setDisplayUrl(blobUrl);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (blobRef.current) {
+        URL.revokeObjectURL(blobRef.current);
+        blobRef.current = null;
+      }
+    };
+  }, [baseUrl]);
+
+  return { displayUrl, colorCacheKey: httpUrl };
+}

@@ -1,5 +1,8 @@
 import type { VersionNameRow } from '@/state/versionRegionFilter';
-import { getVersionGroupIdForVersionId } from '@/state/versionRegionFilter';
+import {
+  getVersionGroupGenerationId,
+  getVersionGroupIdForVersionId,
+} from '@/state/versionRegionFilter';
 
 export function formatFlavorText(raw: string): string {
   return raw.replace(/\f/g, ' ').replace(/\s+/g, ' ').trim();
@@ -30,6 +33,34 @@ export function effectiveFlavorVersionId(
   if (flavorRows.length === 0) return null;
   if (selectedVersionId !== 0) return selectedVersionId;
   return maxFlavorVersionId(flavorRows);
+}
+
+/** Generation of the game used for modal flavor (same `version_id` as `effectiveFlavorVersionId`). */
+export function effectiveCryGameGenerationId(
+  selectedVersionId: number,
+  flavorRows: ReadonlyArray<{ version_id: number }>,
+  versionRows: VersionNameRow[] | undefined,
+): number | undefined {
+  const vid = effectiveFlavorVersionId(selectedVersionId, flavorRows);
+  if (vid == null) return undefined;
+  const row = versionRows?.find((r) => r.version_id === vid);
+  if (!row) return undefined;
+  return getVersionGroupGenerationId(row);
+}
+
+/**
+ * PokéAPI exposes `legacy` (pre–Gen VI style) and `latest` (modern). Pick by the selected game’s generation.
+ */
+export function pickPokemonCryUrl(
+  cries: { latest?: string | null; legacy?: string | null } | null | undefined,
+  gameGenerationId: number | undefined,
+): string | null {
+  const latest = cries?.latest ?? null;
+  const legacy = cries?.legacy ?? null;
+  const preferLegacy =
+    gameGenerationId != null && gameGenerationId > 0 && gameGenerationId <= 5;
+  if (preferLegacy) return legacy ?? latest;
+  return latest ?? legacy;
 }
 
 export function flavorRowForVersion(
