@@ -2,7 +2,7 @@ import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePathname, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useColorScheme } from "react-native";
+import { useUniwind } from "uniwind";
 import { DESKTOP_BREAKPOINT, NAV_ITEMS, pathActive } from "./nav-config";
 import { useNavDrawer } from "./NavDrawerContext";
 
@@ -13,8 +13,8 @@ export function ChromeHeader() {
 	const pathname = usePathname();
 	const router = useRouter();
 	const { toggle } = useNavDrawer();
-	const colorScheme = useColorScheme();
-	const isDark = colorScheme === "dark";
+	const { theme } = useUniwind();
+	const isDark = theme === "dark";
 	const borderColor = isDark ? "#27272a" : "#e4e4e7";
 	const activeColor = isDark ? "#93c5fd" : "#2563eb";
 	const mutedColor = isDark ? "#a1a1aa" : "#71717a";

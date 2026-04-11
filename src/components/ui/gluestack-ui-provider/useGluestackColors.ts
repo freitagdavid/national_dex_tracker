@@ -1,4 +1,4 @@
-import { useColorScheme } from 'nativewind';
+import { useUniwind } from 'uniwind';
 import { colors } from './config';
 
 /**
@@ -20,7 +20,7 @@ function rgbToHex(rgbString: string): string {
 
   const [r, g, b] = parts.map((s) => {
     const num = parseInt(s, 10);
-    return isNaN(num) ? 0 : num;
+    return Number.isNaN(num) ? 0 : num;
   });
 
   const toHex = (n: number) =>
@@ -39,13 +39,13 @@ function rgbToHex(rgbString: string): string {
  *          colors.forest -> '#228b22' (if you add --forest to config)
  */
 export function useGluestackColors(): Record<string, string> {
-  const { colorScheme } = useColorScheme();
-  const theme = colors[colorScheme || 'light'];
+  const { theme } = useUniwind();
+  const palette = theme === 'dark' ? colors.dark : colors.light;
 
   // Dynamically convert all CSS variables to camelCase hex colors
   const result: Record<string, string> = {};
 
-  Object.entries(theme).forEach(([key, value]) => {
+  Object.entries(palette).forEach(([key, value]) => {
     const camelKey = toCamelCase(key);
     result[camelKey] = rgbToHex(value as string);
   });

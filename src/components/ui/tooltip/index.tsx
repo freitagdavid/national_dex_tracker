@@ -10,17 +10,15 @@ import {
   AnimatePresence,
   MotionComponentProps,
 } from '@legendapp/motion';
-import { styled } from 'nativewind';
+import { withUniwind } from 'uniwind';
 
 type IMotionViewProps = React.ComponentProps<typeof View> &
   MotionComponentProps<typeof View, ViewStyle, unknown, unknown, unknown>;
 
 const MotionView = Motion.View as React.ComponentType<IMotionViewProps>;
 
-const StyledMotionView = styled(MotionView, { className: 'style' });
-
 export const UITooltip = createTooltip({
-  Root: withStyleContext(StyledMotionView),
+  Root: withStyleContext(View),
   Content: MotionView,
   Text: Text,
   AnimatePresence: AnimatePresence,
