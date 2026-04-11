@@ -79,15 +79,7 @@ function App() {
 					}
 					{
 						!isError && data && (
-						// <Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
-						// 	{boxes.map((box, boxIndex) => (
-						// 		<PokemonBox
-						// 			box={box}
-						// 			boxNum={boxIndex}
-						// 			key={boxIndex}
-						// 		/>
-						// 	))}
-						// </Box>
+						
 						<PokemonListView
 							listStyle={layout}
 						/>

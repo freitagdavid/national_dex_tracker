@@ -1,5 +1,8 @@
 
+import { Box } from '../../Box';
 import {Text} from '@/components/ui/text';
+import { Box as PokemonBox } from '../../../components/Box';
+import React from 'react';
 import {View} from 'react-native';
 
 interface PokemonListViewProps {
@@ -9,9 +12,15 @@ interface PokemonListViewProps {
 export const PokemonListView = ({listStyle}: PokemonListViewProps) => {
   if (listStyle === 'grid') {
     return (
-      <View>
-        <Text>Grid</Text>
-      </View>
+      <Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
+							{boxes.map((box, boxIndex) => (
+								<PokemonBox
+									box={box}
+									boxNum={boxIndex}
+									key={boxIndex}
+								/>
+							))}
+						</Box>
     )
   }
   if (listStyle === 'list') {

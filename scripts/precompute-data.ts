@@ -1,9 +1,12 @@
 /**
  * Fills `src/generated/precomputed/graphql-cache.json` and `sprite-card-themes.json`.
  *
- * All outbound requests are rate-limited with **large delays** by default so we do not
- * hammer PokéAPI / sprite hosts. GraphQL calls run strictly one-after-another with a
- * pause after each response; sprite fetches use a separate throttle.
+ * **Hard cap:** at most `--max-calls-per-hour` outbound HTTP requests (GraphQL + sprites
+ * combined) in any rolling 60-minute window, with at least `3600 / max` seconds between
+ * consecutive request starts so we never burst 200 calls at once.
+ *
+ * GraphQL and sprite fetches each run strictly one-at-a-time; optional extra pauses after
+ * each response are configurable.
  *
  * Usage:
  *   bun run scripts/precompute-data.ts
@@ -12,10 +15,10 @@
  *   bun run scripts/precompute-data.ts --colors-only
  *
  * Options:
- *   --delay-ms <n>           Set both GraphQL and sprite delays (ms). Default: use separate defaults.
- *   --graphql-delay-ms <n>   Pause after each GraphQL response. Default: 1500
- *   --sprite-delay-ms <n>    Pause after each sprite HTTP fetch. Default: 1200
- *   --concurrency <n>        Ignored (kept for CLI compatibility); work is sequential.
+ *   --max-calls-per-hour <n> Combined HTTP cap (default 200)
+ *   --delay-ms <n>           Set both GraphQL and sprite post-response delays (ms)
+ *   --graphql-delay-ms <n>   Extra pause after each GraphQL response (default 0)
+ *   --sprite-delay-ms <n>    Extra pause after each sprite fetch (default 0)
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -45,10 +48,13 @@ const OUT_DIR = path.join(ROOT, "src", "generated", "precomputed");
 const GRAPHQL_OUT = path.join(OUT_DIR, "graphql-cache.json");
 const COLORS_OUT = path.join(OUT_DIR, "sprite-card-themes.json");
 
-/** Default pause after each GraphQL response (ms) — conservative for shared beta API. */
-const DEFAULT_GRAPHQL_DELAY_MS = 1500;
-/** Default pause after each sprite CDN request (ms). */
-const DEFAULT_SPRITE_DELAY_MS = 1200;
+/** Extra pause after each GraphQL response (ms); hourly cap is the main throttle. */
+const DEFAULT_GRAPHQL_DELAY_MS = 0;
+/** Extra pause after each sprite fetch (ms). */
+const DEFAULT_SPRITE_DELAY_MS = 0;
+
+const HOUR_MS = 60 * 60 * 1000;
+const DEFAULT_MAX_CALLS_PER_HOUR = 200;
 
 type PrecomputedCache = {
 	version: 1;
@@ -88,19 +94,64 @@ function parseArgs() {
 			? sharedDelay
 			: numArg(argv, "--sprite-delay-ms", DEFAULT_SPRITE_DELAY_MS);
 
+	const maxCallsPerHour = Math.max(
+		1,
+		Math.min(10_000, Math.floor(numArg(argv, "--max-calls-per-hour", DEFAULT_MAX_CALLS_PER_HOUR))),
+	);
+
 	return {
 		quick: flags.has("--quick"),
 		graphqlOnly: flags.has("--graphql-only"),
 		colorsOnly: flags.has("--colors-only"),
 		graphqlDelayMs,
 		spriteDelayMs,
+		maxCallsPerHour,
 	};
 }
 
 /**
- * Strict serialization: one GraphQL request at a time, then a mandatory cool-down.
+ * Enforces a rolling limit on how many HTTP requests may *start* per hour (all callers share
+ * this), plus a minimum gap between consecutive starts so the cap cannot be hit in a few seconds.
  */
-function createRateLimitedGraphql(delayMs: number) {
+function createOutboundHourGate(maxCallsPerHour: number) {
+	const minGapMs = Math.ceil(HOUR_MS / maxCallsPerHour);
+	const callStartTimes: number[] = [];
+	let lastAcquireAt = 0;
+
+	return async function acquireOutboundSlot(): Promise<void> {
+		for (;;) {
+			const now = Date.now();
+			while (callStartTimes.length > 0 && callStartTimes[0]! <= now - HOUR_MS) {
+				callStartTimes.shift();
+			}
+
+			if (callStartTimes.length >= maxCallsPerHour) {
+				const oldest = callStartTimes[0]!;
+				await sleep(oldest + HOUR_MS - now + 100);
+				continue;
+			}
+
+			const sinceLast = lastAcquireAt > 0 ? now - lastAcquireAt : minGapMs;
+			if (sinceLast < minGapMs) {
+				await sleep(minGapMs - sinceLast);
+				continue;
+			}
+
+			const t = Date.now();
+			lastAcquireAt = t;
+			callStartTimes.push(t);
+			return;
+		}
+	};
+}
+
+/**
+ * Strict serialization: one GraphQL request at a time, then optional post-response delay.
+ */
+function createRateLimitedGraphql(
+	delayMs: number,
+	acquireOutboundSlot: () => Promise<void>,
+) {
 	let tail = Promise.resolve();
 
 	return async function graphqlRequest<T>(
@@ -113,6 +164,7 @@ function createRateLimitedGraphql(delayMs: number) {
 			unlock = resolve;
 		});
 		try {
+			await acquireOutboundSlot();
 			const res = await fetch(GRAPHQL_URL, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -136,7 +188,10 @@ function createRateLimitedGraphql(delayMs: number) {
 	};
 }
 
-function createRateLimitedSpriteSampler(spriteDelayMs: number) {
+function createRateLimitedSpriteSampler(
+	spriteDelayMs: number,
+	acquireOutboundSlot: () => Promise<void>,
+) {
 	let tail = Promise.resolve();
 
 	return async function sampleThemeForUrl(url: string) {
@@ -146,6 +201,7 @@ function createRateLimitedSpriteSampler(spriteDelayMs: number) {
 			unlock = resolve;
 		});
 		try {
+			await acquireOutboundSlot();
 			const res = await fetch(url);
 			if (!res.ok) return null;
 			const buf = Buffer.from(await res.arrayBuffer());
@@ -177,12 +233,14 @@ async function main() {
 	const args = parseArgs();
 	mkdirSync(OUT_DIR, { recursive: true });
 
+	const minSpacingSec = (HOUR_MS / args.maxCallsPerHour / 1000).toFixed(1);
 	console.log(
-		`Rate limits: ${args.graphqlDelayMs}ms after each GraphQL response, ${args.spriteDelayMs}ms after each sprite fetch (strictly sequential).`,
+		`Rate limits: max ${args.maxCallsPerHour} outbound HTTP starts per rolling hour (~${minSpacingSec}s min between starts); +${args.graphqlDelayMs}ms after GraphQL, +${args.spriteDelayMs}ms after sprites; sequential.`,
 	);
 
-	const graphqlRequest = createRateLimitedGraphql(args.graphqlDelayMs);
-	const sampleThemeForUrl = createRateLimitedSpriteSampler(args.spriteDelayMs);
+	const acquireOutboundSlot = createOutboundHourGate(args.maxCallsPerHour);
+	const graphqlRequest = createRateLimitedGraphql(args.graphqlDelayMs, acquireOutboundSlot);
+	const sampleThemeForUrl = createRateLimitedSpriteSampler(args.spriteDelayMs, acquireOutboundSlot);
 
 	let cache: PrecomputedCache = {
 		version: 1,
