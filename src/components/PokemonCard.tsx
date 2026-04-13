@@ -9,6 +9,8 @@ import { Box } from "@/components/ui/box";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { memo } from "react";
+import { pokemonRowPropsEqual } from "@/lib/pokemonRowMemo";
 
 export const SkeletonCard = () => {
 	return (
@@ -26,14 +28,15 @@ export const SkeletonCard = () => {
 	);
 };
 
-export const PokemonCard = ({
+const PokemonCardInner = ({
 	poke,
 	boxNum,
+	caught,
 }: {
 	poke: Pokemon;
 	boxNum: number;
+	caught: boolean;
 }) => {
-	const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
 	const { url: spriteUrl } = usePokemonSpriteUrl(poke);
 
 	const handleCaught = () => {
@@ -42,31 +45,34 @@ export const PokemonCard = ({
 
 	return (
 		<Pressable onPress={handleCaught}>
-			<Card className="relative mt-3 aspect-square w-44 flex-col justify-between">
-				<Pressable
-					accessibilityLabel={`${poke.displayName} details`}
-					onPress={() => openPokemonInfo(poke.speciesId, poke.id)}
-					className="absolute right-1 top-1 z-10 h-7 w-7 items-center justify-center rounded-full border border-border bg-background"
-				>
-					<MaterialIcons name="info-outline" size={18} color="#333" />
-				</Pressable>
-				<Box className="py-2">
+			<Card className="relative mt-3 aspect-square w-44 flex-col px-1 py-2">
+				<Box className="flex flex-row justify-center items-center w-full">
 					<Text className="text-center text-base font-semibold text-card-foreground">
 						{poke.displayName}
 					</Text>
+					<Pressable
+						accessibilityLabel={`${poke.displayName} details`}
+						onPress={() => openPokemonInfo(poke.speciesId, poke.id)}
+						className="z-10 h-7 w-7 items-center justify-center rounded-full border border-border bg-background align-self-end absolute right-0"
+					>
+						<MaterialIcons name="info-outline" size={18} color="#333" />
+					</Pressable>
 				</Box>
 				<Box className="items-center px-0 pb-0">
 					<Image
 						source={{ uri: spriteUrl }}
 						style={{ width: 100, height: 100 }}
 						contentFit="contain"
-						transition={200}
+						cachePolicy="memory-disk"
+						priority="high"
+						recyclingKey={String(poke.id)}
+						transition={0}
 					/>
 				</Box>
 				<Box
-					className={`w-full py-2 ${caught ? "bg-green-500" : "bg-red-500"}`}
+					className={`w-full px-4`}
 				>
-					<Text className="text-center text-sm font-medium text-white">
+					<Text className={`py-2 text-center text-sm font-medium text-white ${caught ? "bg-green-500" : "bg-red-500"}`}>
 						{caught ? "Caught" : "Uncaught"}
 					</Text>
 				</Box>
@@ -74,3 +80,16 @@ export const PokemonCard = ({
 		</Pressable>
 	);
 };
+
+const PokemonCardMemo = memo(PokemonCardInner, (prev, next) => {
+	return (
+		prev.caught === next.caught &&
+		prev.boxNum === next.boxNum &&
+		pokemonRowPropsEqual(prev.poke, next.poke)
+	);
+});
+
+export function PokemonCard({ poke, boxNum }: { poke: Pokemon; boxNum: number }) {
+	const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
+	return <PokemonCardMemo poke={poke} boxNum={boxNum} caught={caught} />;
+}

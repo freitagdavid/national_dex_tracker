@@ -12,7 +12,7 @@ export const NAV_ITEMS: NavItem[] = [
 	{ href: "/locations", label: "Locations" },
 ];
 
-/** Viewport width (dp / CSS px) at or above this uses the top navbar instead of the hamburger menu. */
+/** Viewport width (dp / CSS px) at or above this shows the persistent side rail + compact header. */
 export const DESKTOP_BREAKPOINT = 900;
 
 export function pathActive(pathname: string, href: string) {

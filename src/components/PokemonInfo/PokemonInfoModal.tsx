@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { ScrollView, Pressable } from 'react-native';
+import { Platform, Pressable, ScrollView } from 'react-native';
 import {
   Modal,
   ModalBackdrop,
@@ -438,8 +438,22 @@ export function PokemonInfoModal() {
           </ModalHeader>
 
           <ScrollView
-            className="max-h-[70vh]"
+            className={
+              Platform.OS === 'web'
+                ? 'max-h-[70vh] pokemon-info-modal-scroll'
+                : 'max-h-[70vh]'
+            }
             contentContainerStyle={{ gap: 16, paddingHorizontal: 24, paddingVertical: 16 }}
+            style={{
+              backgroundColor: theme.cardBg,
+              ...(Platform.OS === "web"
+                ? ({
+                    ["--pokemon-info-scroll-track" as string]: theme.cardBg,
+                    ["--pokemon-info-scroll-thumb" as string]: theme.pillBorder,
+                    ["--pokemon-info-scrollbar-pair" as string]: `${theme.pillBorder} ${theme.cardBg}`,
+                  } as Record<string, string>)
+                : {}),
+            }}
           >
           <Box className="relative z-0 flex-col gap-4">
             {detailQuery.isLoading && <PokemonInfoModalBodySkeleton pillBg={theme.pillBg} />}

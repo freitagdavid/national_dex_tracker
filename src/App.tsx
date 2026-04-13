@@ -1,15 +1,12 @@
 import { useSelector } from "@legendapp/state/react";
 import { useQuery } from "@tanstack/react-query";
-import { Platform, ScrollView, View } from "react-native";
+import { Platform, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { AllPokemonSpeciesWithSpritesQuery } from "@/gql/operation-types";
 import { graphqlRequest } from "@/state/graphqlFetch";
 import { app, SPECIES_QUERY } from "@/state";
 import { AppBar } from "./components/MenuBar";
 import { AppLoadingSkeleton } from "./components/AppLoadingSkeleton";
-import { Box as PokemonBox } from "./components/Box";
-import { PokemonCard } from "./components/PokemonCard";
-import { PokemonListItem } from "./components/PokemonListItem";
 import { PokemonInfoModal } from "./components/PokemonInfo/PokemonInfoModal";
 import { StatefuleProgress } from "./components/StatefulProgress";
 import { Box } from "@/components/ui/box";
@@ -27,10 +24,6 @@ function App() {
 			graphqlRequest<AllPokemonSpeciesWithSpritesQuery>(SPECIES_QUERY),
 	});
 
-	const showMainSkeleton =
-		!speciesBootstrap.isError &&
-		!speciesBootstrap.data &&
-		speciesBootstrap.isPending;
 
 	const shellStyle = { flex: 1 as const, minHeight: 0 as const };
 
@@ -55,12 +48,7 @@ function App() {
 					/>
 					<AppBar />
 				</Box>
-				<ScrollView
-					className="min-h-0 flex-1"
-					style={shellStyle}
-					contentContainerStyle={{ flexGrow: 1 }}
-					keyboardShouldPersistTaps="handled"
-				>
+				
 					{isError && !data && (
 						<Box className="min-h-full w-full items-center justify-center p-6">
 						<Text className="text-center text-sm text-destructive">
@@ -77,34 +65,11 @@ function App() {
 							<AppLoadingSkeleton layout={layout} />
 						)
 					}
-					{
-						!isError && data && (
-						
-						<PokemonListView
-							listStyle={layout}
-						/>
-						)
-					}
-					
-					{/* ) : layout === "box" ? (
-					) : layout === "grid" ? (
-						<Box className="w-full flex-row flex-wrap justify-around px-2 py-2">
-							{pokemon.map((poke, index) => (
-								<PokemonCard
-									poke={poke}
-									key={poke.id}
-									boxNum={Math.floor(index / 30)}
-								/>
-							))}
-						</Box>
-					) : (
-						<Box className="w-full flex-col gap-3 px-3 py-4">
-							{pokemon.map((poke) => (
-								<PokemonListItem poke={poke} key={poke.id} />
-							))}
-						</Box>
-					)} */}
-				</ScrollView>
+					{!isError && data && !isPending && (
+						<View style={shellStyle}>
+							<PokemonListView listStyle={layout} boxes={boxes} pokemon={pokemon} />
+						</View>
+					)}
 			</Box>
 		</>
 	);

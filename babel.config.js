@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = function (api) {
 	api.cache(true);
 
-	const srcPath = path.resolve(__dirname, "src");
+	const projectRoot = path.resolve(__dirname);
 
 	return {
 		presets: ["babel-preset-expo"],
@@ -12,13 +12,13 @@ module.exports = function (api) {
 			[
 				"module-resolver",
 				{
-					// Absolute paths so `@/*` always maps to `./src/*` no matter which file imports
-					// (e.g. `app/*.tsx`). Relative `./src` can be resolved from the wrong cwd and
-					// turn into `../components/...` from `app/`, which does not exist.
-					root: [path.resolve(__dirname)],
+					// Anchor resolution to this repo. Alias must stay a *relative* `"./src"` string — using
+					// `path.resolve(__dirname, "src")` here bakes `/tmp/.../absolute` paths into the graph,
+					// which breaks EAS local builds when Metro resolves across different temp directories.
+					root: [projectRoot],
 					extensions: [".ios.js", ".android.js", ".js", ".jsx", ".json", ".tsx", ".ts"],
 					alias: {
-						"@": srcPath,
+						"@": "./src",
 					},
 				},
 			],

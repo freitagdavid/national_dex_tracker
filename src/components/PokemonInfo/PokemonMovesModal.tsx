@@ -1,7 +1,7 @@
 import { useSelector } from "@legendapp/state/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { ScrollView } from "react-native";
+import { Platform, ScrollView } from "react-native";
 import {
 	Modal,
 	ModalBackdrop,
@@ -113,8 +113,22 @@ export function PokemonMovesModal({
 					</Text>
 				</ModalHeader>
 				<ScrollView
-					className="min-h-[280px] max-h-[60vh] px-6 pb-6"
+					className={
+						Platform.OS === "web"
+							? "min-h-[280px] max-h-[60vh] bg-background px-6 pb-6 pokemon-info-modal-scroll"
+							: "min-h-[280px] max-h-[60vh] bg-background px-6 pb-6"
+					}
 					nestedScrollEnabled
+					style={
+						Platform.OS === "web"
+							? ({
+									["--pokemon-info-scroll-track" as string]: "var(--color-background)",
+									["--pokemon-info-scroll-thumb" as string]: "var(--color-border)",
+									["--pokemon-info-scrollbar-pair" as string]:
+										"var(--color-border) var(--color-background)",
+								} as Record<string, string>)
+							: undefined
+					}
 				>
 					{movesQuery.isLoading && <PokemonMovesModalSkeleton />}
 					{!movesQuery.isLoading && movesQuery.isError && (

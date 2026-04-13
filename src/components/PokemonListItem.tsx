@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { memo, useCallback, useRef } from "react";
 import { useSelector } from "@legendapp/state/react";
 import { Image } from "expo-image";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -22,6 +22,7 @@ import { Box } from "@/components/ui/box";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text as UIText } from "@/components/ui/text";
+import { pokemonRowPropsEqual } from "@/lib/pokemonRowMemo";
 
 const SWIPE_ACTION_WIDTH = 120;
 const CARD_RADIUS = 22;
@@ -111,12 +112,15 @@ function CaughtCutoutDisc({
 	);
 }
 
-export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
-	const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
-	const favorite = useSelector(
-		() => app.state.ui.favoriteById[poke.speciesId].get() ?? false,
-	);
-
+const PokemonListItemInner = ({
+	poke,
+	caught,
+	favorite,
+}: {
+	poke: Pokemon;
+	caught: boolean;
+	favorite: boolean;
+}) => {
 	const swipeRef = useRef<SwipeableMethods | null>(null);
 	/** True while a horizontal swipe gesture is active or until the row has settled closed. */
 	const blockRowPressRef = useRef(false);
@@ -156,10 +160,10 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
 			accessibilityHint="Swipe right to toggle caught, swipe left to toggle favorite."
 		>
 			<Card
-				className="relative min-h-[104px] flex-row overflow-hidden rounded-[1.35rem] border-0 py-0 pl-4 pr-0 shadow-md"
+				className="relative h-24 flex-row overflow-hidden rounded-[1.35rem] border-0 py-0 pl-4 pr-0"
 				style={{ backgroundColor: theme.cardBg }}
 			>
-				<Box className="relative z-10 min-w-0 flex-1 flex-col justify-center gap-2 py-3 pr-1">
+				<Box className="relative z-10 min-w-0 flex-1 flex-col justify-center gap-5 py-3 pr-1">
 					<Box className="min-w-0 flex-row items-center gap-2">
 						<Box className="min-w-0 flex-1 flex-row items-baseline gap-2">
 							<UIText
@@ -242,13 +246,19 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
 						className="absolute bottom-0 right-0 top-0 w-[92%] rounded-l-full"
 						style={{ backgroundColor: theme.artBlob }}
 					/>
+					<Box className="relative z-10 left-3">
 					<Image
 						key={`${poke.id}-${colorCacheKey}`}
 						source={{ uri: spriteUrl }}
 						style={{ width: 104, height: 104 }}
 						contentFit="contain"
-						className="relative z-10"
+						cachePolicy="memory-disk"
+						priority="high"
+						recyclingKey={String(poke.id)}
+						transition={0}
+						
 					/>
+					</Box>
 				</Box>
 			</Card>
 		</Pressable>
@@ -278,6 +288,22 @@ export const PokemonListItem = ({ poke }: { poke: Pokemon }) => {
 		</View>
 	);
 };
+
+const PokemonListItemMemo = memo(PokemonListItemInner, (prev, next) =>
+	pokemonRowPropsEqual(prev.poke, next.poke) &&
+	prev.caught === next.caught &&
+	prev.favorite === next.favorite,
+);
+
+export function PokemonListItem({ poke }: { poke: Pokemon }) {
+	const caught = useSelector(() => app.state.ui.caughtById[poke.id].get() ?? false);
+	const favorite = useSelector(
+		() => app.state.ui.favoriteById[poke.speciesId].get() ?? false,
+	);
+	return (
+		<PokemonListItemMemo poke={poke} caught={caught} favorite={favorite} />
+	);
+}
 
 const styles = StyleSheet.create({
 	rowWrap: {

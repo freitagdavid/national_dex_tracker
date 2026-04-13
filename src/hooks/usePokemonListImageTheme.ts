@@ -29,32 +29,33 @@ export function usePokemonListImageTheme(
 		[colorCacheKey],
 	);
 
-	const [artTheme, setArtTheme] = useState<ListCardTheme | null>(null);
+	/** Only used when `sprite-card-themes.json` has no entry — filled async. */
+	const [sampledTheme, setSampledTheme] = useState<ListCardTheme | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
 
 		if (!colorCacheKey?.trim()) {
-			setArtTheme(null);
+			setSampledTheme(null);
 			return () => {
 				cancelled = true;
 			};
 		}
 
 		if (precomputed) {
-			setArtTheme(precomputed);
+			setSampledTheme(null);
 			return () => {
 				cancelled = true;
 			};
 		}
 
-		setArtTheme(null);
+		setSampledTheme(null);
 
 		void (async () => {
 			const raw = await sampleDominantCardColor(colorCacheKey);
 			if (cancelled || !raw) return;
 			const base = refineExtractedCardBase(raw);
-			setArtTheme(listCardThemeFromBase(base));
+			setSampledTheme(listCardThemeFromBase(base));
 		})();
 
 		return () => {
@@ -62,6 +63,7 @@ export function usePokemonListImageTheme(
 		};
 	}, [colorCacheKey, precomputed]);
 
-	const theme = artTheme ?? fallbackTheme;
+	// Apply precomputed themes on the first paint — do not wait for useEffect (avoids flash on scroll).
+	const theme = precomputed ?? sampledTheme ?? fallbackTheme;
 	return { theme, onArtLoad: () => {} };
 }
